@@ -29,6 +29,7 @@ import proxy from './plugins/proxy';
 import techdocs from './plugins/techdocs';
 import search from './plugins/search';
 import bazaar from './plugins/bazaar';
+import backendpl from './plugins/backendpl';
 
 import { PluginEnvironment } from './types';
 import { ServerPermissionClient } from '@backstage/plugin-permission-node';
@@ -88,8 +89,10 @@ async function main() {
   const techdocsEnv = useHotMemoize(module, () => createEnv('techdocs'));
   const searchEnv = useHotMemoize(module, () => createEnv('search'));
   const appEnv = useHotMemoize(module, () => createEnv('app'));
-
+  const backendplEnv = useHotMemoize(module, () => createEnv('backendpl'));
+  
   const apiRouter = Router();
+  apiRouter.use('/backendpl', await backendpl(backendplEnv));
   apiRouter.use('/bazaar', await bazaar(bazaarEnv));
   apiRouter.use('/catalog', await catalog(catalogEnv));
   apiRouter.use('/scaffolder', await scaffolder(scaffolderEnv));
