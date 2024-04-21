@@ -29,12 +29,9 @@ backend:
     client: pg
     connection:
       host: localhost
-      # Default postgresql port is 5432; this might be different for your installation
       port: 5432
       user: postgres
-      # Replace the password below with your postgresql password:
       password: admin123
-  # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
 ios:
   testA: responseA
