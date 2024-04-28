@@ -1,6 +1,9 @@
 import React, { PropsWithChildren } from 'react';
 
 import StorefrontIcon from '@material-ui/icons/Storefront';
+import AccessibleIcon from '@mui/icons-material/Accessible';
+import AccessAlarmIcon from '@material-ui/icons/AccessAlarm';
+import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 import { makeStyles } from '@material-ui/core';
 import HomeIcon from '@material-ui/icons/Home';
 import ExtensionIcon from '@material-ui/icons/Extension';
@@ -76,6 +79,7 @@ export const Root = ({ children }: PropsWithChildren<{}>) => (
         <SidebarScrollWrapper>
           <SidebarItem icon={MapIcon} to="tech-radar" text="Tech Radar" />
           <SidebarItem icon={StorefrontIcon} to="bazaar" text="Bazaar" />
+          <SidebarItem icon={DeviceHubIcon} to="ios" text="IOS" />
         </SidebarScrollWrapper>
       </SidebarGroup>
       <SidebarSpace />
