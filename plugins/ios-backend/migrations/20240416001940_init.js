@@ -4,9 +4,10 @@
  */
 exports.up = function(knex) {
     return knex.schema.createTable('ios-table', function(table){
-        table.increments();
-        table.string('username');
-        table.string('comment')
+        table.string('project_name');
+        table.string('project_description');
+        table.string('project_owner');
+        table.string('project_contributors');
     });  
 };
 

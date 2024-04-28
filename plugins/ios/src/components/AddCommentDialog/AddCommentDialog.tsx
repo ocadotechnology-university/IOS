@@ -1,9 +1,15 @@
 import React, { useState, ChangeEvent } from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { iosApiRef } from '../../api';
 import { useApi } from '@backstage/core-plugin-api';
-import { IosApi } from '../../api'; 
+import { iosApiRef } from '../../api';
 
 const useStyles = makeStyles({
   dialogContent: {
@@ -12,33 +18,68 @@ const useStyles = makeStyles({
   },
 });
 
-type AddCommentDialogProps = {
+type AddProjectDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (title: string, description: string) => void; 
+  onSubmit: (
+    project_name: string,
+    project_description: string,
+    project_owner: string,
+    project_contributors: string
+  ) => void;
 };
 
-export const AddCommentDialog = ({ open, onClose, onSubmit }: AddCommentDialogProps) => {
+export const AddProjectDialog = ({
+  open,
+  onClose,
+  onSubmit,
+}: AddProjectDialogProps) => {
   const classes = useStyles();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const iosApi = useApi(iosApiRef) as IosApi; 
-  
-  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.target.value);
+  const [project_name, setProjectName] = useState('');
+  const [project_description, setProjectDescription] = useState('');
+  const [project_owner, setProjectOwner] = useState('');
+  const [project_contributors, setProjectContributors] = useState('');
+
+  const iosApi = useApi(iosApiRef);
+
+  const handleProjectNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setProjectName(event.target.value);
   };
 
-  const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDescription(event.target.value);
+  const handleProjectDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setProjectDescription(event.target.value);
+  };
+
+  const handleProjectOwnerChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setProjectOwner(event.target.value);
+  };
+
+  const handleProjectContributorsChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setProjectContributors(event.target.value);
   };
 
   const handleSubmit = async () => {
     try {
-      await iosApi.insertComment(title, description);
-      onSubmit(title, description);
-      setTitle('');
-      setDescription('');
-      onClose(); // Close doesn't work
+      await iosApi.insertProject(
+        project_name,
+        project_description,
+        project_owner,
+        project_contributors
+      );
+
+      onSubmit(
+        project_name,
+        project_description,
+        project_owner,
+        project_contributors
+      );
+
+      // Reset the input fields and close the dialog
+      setProjectName('');
+      setProjectDescription('');
+      setProjectOwner('');
+      setProjectContributors('');
+      onClose();
     } catch (error) {
       console.error('Error adding project:', error);
     }
@@ -46,21 +87,35 @@ export const AddCommentDialog = ({ open, onClose, onSubmit }: AddCommentDialogPr
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Add Comment</DialogTitle>
+      <DialogTitle>Add Project</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <TextField
-          label="Username"
-          value={title}
-          onChange={handleTitleChange}
+          label="Project Name"
+          value={project_name}
+          onChange={handleProjectNameChange}
           margin="normal"
         />
         <TextField
-          label="Comment"
-          value={description}
-          onChange={handleDescriptionChange}
-          margin="normal"
+          label="Project Description"
+          value={project_description}
+          onChange={handleProjectDescriptionChange}
           multiline
           rows={4}
+          margin="normal"
+        />
+        <TextField
+          label="Project Owner"
+          value={project_owner}
+          onChange={handleProjectOwnerChange}
+          margin="normal"
+        />
+        <TextField
+          label="Project Contributors"
+          value={project_contributors}
+          onChange={handleProjectContributorsChange}
+          multiline
+          rows={2}
+          margin="normal"
         />
       </DialogContent>
       <DialogActions>

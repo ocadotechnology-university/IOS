@@ -9,8 +9,8 @@ import {
   HeaderLabel,
   SupportButton,
 } from '@backstage/core-components';
-import { CommentComponent } from '../CommentTable';
-import { AddCommentDialog } from '../AddCommentDialog/AddCommentDialog';
+import { ProjectComponent } from '../CommentTable';
+import { AddProjectDialog } from '../AddCommentDialog/AddCommentDialog';
 
 interface CommentData {
   title: string;
@@ -56,10 +56,10 @@ export const ExampleComponent = () => {
             </Button>
           </Grid>
           <Grid item>
-            <CommentComponent />
+            <ProjectComponent />
           </Grid>
         </Grid>
-        <AddCommentDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmitComment} />
+        <AddProjectDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmitComment} />
       </Content>
     </Page>
   );

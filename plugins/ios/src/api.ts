@@ -29,27 +29,102 @@ export class IosClient implements IosApi {
     this.fetchApi = options.fetchApi;
   }
 
-  async insertComment(username: string, comment: string): Promise<void> {
+  async insertProject(
+    project_name: string,
+    project_description: string,
+    project_owner: string,
+    project_contributors: string
+  ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/db/${username}/${comment}`;
-    return await this.fetchApi
-      .fetch(url, { method: 'POST' })
-      .then(res => res.json());
+    const url = `${baseUrl}/db/`;
+  
+    const payload = {
+      project_name,
+      project_description,
+      project_owner,
+      project_contributors
+    };
+  
+    const response = await this.fetchApi.fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload) 
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Failed to insert comment: ${response.statusText}`);
+    }
+  
+    return await response.json();
   }
   
-  async deleteComment(username: string, comment: string): Promise<void> {
+  
+  async deleteProject(    
+    project_name: string,
+    project_description: string,
+    project_owner: string,
+    project_contributors: string
+    ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/db/${username}/${comment}`;
-    return await this.fetchApi
-      .fetch(url, { method: 'DELETE' })
-      .then(res => res.json());
+    const url = `${baseUrl}/db/`;
+
+    const payload = {
+      project_name,
+      project_description,
+      project_owner,
+      project_contributors
+    };
+
+    const response = await this.fetchApi.fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload) 
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete comment: ${response.statusText}`);
+    }
+  
+    return await response.json();
   }
 
-  async getComments(): Promise<IosIn[]> {
+  async getProjects(): Promise<IosIn[]> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/db/get`;
+    const url = `${baseUrl}/db`;
     return await this.fetchApi
       .fetch(url)
       .then(res => res.json());
   }
+
+  async updateProject(    
+    project_name: string,
+    project_description: string,
+    project_owner: string,
+    project_contributors: string
+    ): Promise<void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/db`;
+    
+    const payload = {
+      project_name,
+      project_description,
+      project_owner,
+      project_contributors
+    };
+    
+    const response = await this.fetchApi.fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload) 
+    });
+
+    return await response.json();
+  }
+
 }  

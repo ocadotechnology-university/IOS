@@ -27,19 +27,34 @@ export class DatabaseHandler {
     this.client = client;
   }
 
-  async insertComment(username: string, comment: string): Promise<void> {
+  async insertProject(project_name: string, project_description: string, project_owner: string, project_contributors: string): Promise<void> {
     try {
-      await this.client('ios-table').insert({ username, comment }); 
-      console.log(`Username "${username}" and comment "${comment}" inserted successfully.`);
+      await this.client('ios-table').insert({ project_name, project_description, project_owner, project_contributors }); 
+      console.log(`Project inserted succesfully`);
     } catch (error) {
-      console.error('Error inserting value:', error);
+      console.error('Error inserting Project:', error);
       throw error;
     }
   }
 
-  async deleteComment(username: string, comment: string): Promise<void> {
+  async updateProject(
+    project_name: string,
+    updates: Partial<{ project_description: string; project_owner: string; project_contributors: string }>
+  ): Promise<void> {
     try {
-      await this.client('ios-table').where({ username, comment }).del();
+      await this.client('ios-table')
+        .where({ project_name }) 
+        .update(updates); 
+      console.log(`Project updated successfully.`);
+    } catch (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
+  }
+
+  async deleteProject(project_name: string, project_description: string, project_owner: string, project_contributors: string ): Promise<void> {
+    try {
+      await this.client('ios-table').where({ project_name, project_description, project_owner, project_contributors  }).del();
       console.log(`Comment deleted successfully.`);
     } catch (error) {
       console.error('Error deleting value:', error);
@@ -47,9 +62,9 @@ export class DatabaseHandler {
     }
   }
 
-  async getComments(): Promise<{ username: string; comment: string }[]> {
+  async getProjects(): Promise<{ project_name: string, project_description: string, project_owner: string, project_contributors: string }[]> {
     try {
-      const comments = await this.client('ios-table').select('username', 'comment');
+      const comments = await this.client('ios-table').select('project_name', 'project_description', 'project_owner', 'project_contributors');
       return comments;
     } catch (error) {
       console.error('Error fetching comments:', error);

@@ -1,1 +1,1 @@
-export { CommentComponent } from './CommentTable';
+export { ProjectComponent } from './CommentTable';

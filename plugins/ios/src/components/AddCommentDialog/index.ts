@@ -1,1 +1,1 @@
-export { AddCommentDialog } from './AddCommentDialog';
+export { AddProjectDialog } from './AddCommentDialog';

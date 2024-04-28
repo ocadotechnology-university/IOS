@@ -34,23 +34,49 @@ export async function createRouter(
     response.json({ response: value });
   });
 
-  router.post('/db/:username/:comment', async (request, response) => { 
-    const { username, comment } = request.params;
+  router.post('/db', async (request, response) => {
+    const { project_name, project_description, project_owner, project_contributors } = request.body;
     try {
-      await dbHandler.insertComment(username, comment); 
-      response.status(200).send('Value inserted successfully.');
+      await dbHandler.insertProject(project_name, project_description, project_owner, project_contributors);
+      response.status(200).send('Project inserted successfully.');
     } catch (error) {
-      console.error('Error inserting value:', error);
+      console.error('Error inserting project:', error);
       response.status(500).send('Internal server error');
     }
-  }); 
+  });
   
 
-  router.delete('/db/:username/:comment', async (request, response) => {
-    const { username, comment } = request.params;
+  router.put('/db', async (request, response) => {
+    const { project_name, project_description, project_owner, project_contributors } = request.body;
+  
+    const updates: { project_description?: string; project_owner?: string; project_contributors?: string } = {};
+  
+    if (project_description) {
+      updates.project_description = project_description;
+    }
+  
+    if (project_owner) {
+      updates.project_owner = project_owner;
+    }
+  
+    if (project_contributors) {
+      updates.project_contributors = project_contributors;
+    }
+  
+    try {
+      await dbHandler.updateProject(project_name, updates);
+      response.status(200).send('Project updated successfully.');
+    } catch (error) {
+      console.error('Error updating project:', error);
+      response.status(500).send('Internal server error.');
+    }
+  });
+
+  router.delete('/db', async (request, response) => {
+    const { project_name, project_description, project_owner, project_contributors } = request.body;
 
     try {
-      await dbHandler.deleteComment(username, comment);
+      await dbHandler.deleteProject(project_name, project_description, project_owner, project_contributors);
       response.status(200).send(`Value deleted successfully.`);
     } catch (error) {
       console.error('Error deleting value:', error);
@@ -59,9 +85,9 @@ export async function createRouter(
   });
 
 
-  router.get('/db/get', async (_, response) => {
+  router.get('/db', async (_, response) => {
     try {
-      const comments = await dbHandler.getComments();
+      const comments = await dbHandler.getProjects();
       response.status(200).json(comments);
     } catch (error) {
       console.error('Error fetching comments:', error);

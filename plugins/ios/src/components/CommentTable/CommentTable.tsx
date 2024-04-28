@@ -2,40 +2,57 @@ import React, { useEffect, useState } from 'react';
 import { Table, TableColumn } from '@backstage/core-components';
 import { Button } from '@material-ui/core';
 import { useApi } from '@backstage/core-plugin-api';
-import { IosIn, iosApiRef } from '../../api';
+import { iosApiRef } from '../../api';
 
-export const CommentComponent = () => {
-  const [comments, setComments] = useState<IosIn[]>([]);
+export const ProjectComponent = () => {
+  const [projects, setProjects] = useState([]);
   const iosApi = useApi(iosApiRef);
 
   useEffect(() => {
-    const fetchComments = async () => {
+    const fetchProjects = async () => {
       try {
-        const commentsData = await iosApi.getComments();
-        setComments(commentsData);
+        const projectData = await iosApi.getProjects(); 
+        setProjects(projectData);
       } catch (error) {
-        console.error('Error fetching comments:', error);
+        console.error('Error fetching projects:', error);
       }
     };
 
-    fetchComments();
+    fetchProjects(); // Initial fetch to populate table
   }, [iosApi]);
 
-  const handleDeleteComment = async (username: string, comment: string) => {
+  const handleDeleteProject = async (
+    project_name: string,
+    project_description: string,
+    project_owner: string,
+    project_contributors: string
+  ) => {
     try {
-      await iosApi.deleteComment(username, comment);
-      const updatedComments = comments.filter(
-        c => c.username !== username || c.comment !== comment,
+      await iosApi.deleteProject(
+        project_name,
+        project_description,
+        project_owner,
+        project_contributors
       );
-      setComments(updatedComments);
+
+      const updatedProjects = projects.filter(
+        p =>
+          p.project_name !== project_name ||
+          p.project_description !== project_description ||
+          p.project_owner !== project_owner ||
+          p.project_contributors !== project_contributors
+      );
+      setProjects(updatedProjects); // Update state after deletion
     } catch (error) {
-      console.error('Error deleting comment:', error);
+      console.error('Error deleting project:', error);
     }
   };
 
   const columns: TableColumn[] = [
-    { title: 'Name', field: 'name' },
-    { title: 'Comment', field: 'comment' },
+    { title: 'Project Name', field: 'project_name' },
+    { title: 'Project Description', field: 'project_description' },
+    { title: 'Project Owner', field: 'project_owner' },
+    { title: 'Project Contributors', field: 'project_contributors' },
     {
       title: 'Actions',
       field: 'actions',
@@ -43,7 +60,14 @@ export const CommentComponent = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => handleDeleteComment(rowData.name, rowData.comment)}
+          onClick={() =>
+            handleDeleteProject(
+              rowData.project_name,
+              rowData.project_description,
+              rowData.project_owner,
+              rowData.project_contributors
+            )
+          }
         >
           Delete
         </Button>
@@ -51,12 +75,13 @@ export const CommentComponent = () => {
     },
   ];
 
-  const data: { name: string; comment: string; actions: string; }[] = comments.map(comment => ({
-    name: comment.username,
-    comment: comment.comment,
-    actions: comment.username && comment.comment ? 'delete' : '',
+  const data = projects.map(project => ({
+    project_name: project.project_name,
+    project_description: project.project_description,
+    project_owner: project.project_owner,
+    project_contributors: project.project_contributors,
+    actions: '', // Actions is now set by the render method in TableColumn
   }));
 
-  return <Table title="Comments" columns={columns} data={data} />;
+  return <Table title="Projects" columns={columns} data={data} />;
 };
-
