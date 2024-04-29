@@ -49,9 +49,9 @@ export const ExampleComponent = () => {
               Add Project
             </Button>
           </Grid>
-          {/* <Grid item>
+          <Grid item>
             <ProjectComponent />
-          </Grid> */}
+          </Grid> 
 
           <Grid item>
             <Projects />
