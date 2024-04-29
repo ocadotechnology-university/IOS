@@ -1,12 +1,5 @@
-import React, { useState, ChangeEvent } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-} from '@material-ui/core';
+import React, { useState } from 'react';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
@@ -17,17 +10,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
   },
 });
-
-type AddProjectDialogProps = {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (
-    project_name: string,
-    project_description: string,
-    project_owner: string,
-    project_contributors: string
-  ) => void;
-};
 
 export const AddProjectDialog = ({
   open,
@@ -41,22 +23,6 @@ export const AddProjectDialog = ({
   const [project_contributors, setProjectContributors] = useState('');
 
   const iosApi = useApi(iosApiRef);
-
-  const handleProjectNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setProjectName(event.target.value);
-  };
-
-  const handleProjectDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setProjectDescription(event.target.value);
-  };
-
-  const handleProjectOwnerChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setProjectOwner(event.target.value);
-  };
-
-  const handleProjectContributorsChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setProjectContributors(event.target.value);
-  };
 
   const handleSubmit = async () => {
     try {
@@ -74,7 +40,6 @@ export const AddProjectDialog = ({
         project_contributors
       );
 
-      // Reset the input fields and close the dialog
       setProjectName('');
       setProjectDescription('');
       setProjectOwner('');
@@ -92,13 +57,13 @@ export const AddProjectDialog = ({
         <TextField
           label="Project Name"
           value={project_name}
-          onChange={handleProjectNameChange}
+          onChange={(e) => setProjectName(e.target.value)}
           margin="normal"
         />
         <TextField
           label="Project Description"
           value={project_description}
-          onChange={handleProjectDescriptionChange}
+          onChange={(e) => setProjectDescription(e.target.value)}
           multiline
           rows={4}
           margin="normal"
@@ -106,13 +71,13 @@ export const AddProjectDialog = ({
         <TextField
           label="Project Owner"
           value={project_owner}
-          onChange={handleProjectOwnerChange}
+          onChange={(e) => setProjectOwner(e.target.value)}
           margin="normal"
         />
         <TextField
           label="Project Contributors"
           value={project_contributors}
-          onChange={handleProjectContributorsChange}
+          onChange={(e) => setProjectContributors(e.target.value)}
           multiline
           rows={2}
           margin="normal"

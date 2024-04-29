@@ -9,8 +9,9 @@ import {
   HeaderLabel,
   SupportButton,
 } from '@backstage/core-components';
-import { ProjectComponent } from '../CommentTable';
+import { ProjectComponent } from '../ProjectTable';
 import { AddProjectDialog } from '../AddCommentDialog/AddCommentDialog';
+import { Projects } from '../ProjectItemCards';
 
 interface CommentData {
   title: string;
@@ -34,8 +35,8 @@ export const ExampleComponent = () => {
 
   return (
     <Page themeId="tool">
-      <Header title="Welcome to ios!" subtitle="Optional subtitle">
-        <HeaderLabel label="Owner" value="Politechnika Wroclawksa" />
+      <Header title="Welcome to ios!" subtitle="Sharing artifacts provider">
+        <HeaderLabel label="Owner" value="Politechnika Wroclawska / Ocado Technology" />
         <HeaderLabel label="Lifecycle" value="Alpha" />
       </Header>
       <Content>
@@ -44,20 +45,18 @@ export const ExampleComponent = () => {
         </ContentHeader>
         <Grid container spacing={3} direction="column">
           <Grid item>
-            <InfoCard title="Information card">
-              <Typography variant="body1">
-                All content should be wrapped in a card like this.
-              </Typography>
-            </InfoCard>
-          </Grid>
-          <Grid item>
             <Button variant="contained" color="primary" onClick={handleOpenDialog}>
-              Add Comment
+              Add Project
             </Button>
           </Grid>
-          <Grid item>
+          {/* <Grid item>
             <ProjectComponent />
+          </Grid> */}
+
+          <Grid item>
+            <Projects />
           </Grid>
+
         </Grid>
         <AddProjectDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmitComment} />
       </Content>

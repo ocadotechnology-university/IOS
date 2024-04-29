@@ -1,1 +1,0 @@
-export { ProjectComponent } from './CommentTable';

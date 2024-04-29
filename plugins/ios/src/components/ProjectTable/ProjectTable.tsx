@@ -18,7 +18,7 @@ export const ProjectComponent = () => {
       }
     };
 
-    fetchProjects(); // Initial fetch to populate table
+    fetchProjects(); 
   }, [iosApi]);
 
   const handleDeleteProject = async (
@@ -42,7 +42,7 @@ export const ProjectComponent = () => {
           p.project_owner !== project_owner ||
           p.project_contributors !== project_contributors
       );
-      setProjects(updatedProjects); // Update state after deletion
+      setProjects(updatedProjects); 
     } catch (error) {
       console.error('Error deleting project:', error);
     }
@@ -80,7 +80,7 @@ export const ProjectComponent = () => {
     project_description: project.project_description,
     project_owner: project.project_owner,
     project_contributors: project.project_contributors,
-    actions: '', // Actions is now set by the render method in TableColumn
+    actions: '',
   }));
 
   return <Table title="Projects" columns={columns} data={data} />;
