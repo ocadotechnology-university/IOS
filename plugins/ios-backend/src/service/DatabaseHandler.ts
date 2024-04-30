@@ -38,12 +38,12 @@ export class DatabaseHandler {
   }
 
   async updateProject(
-    project_name: string,
-    updates: Partial<{ project_description: string; project_owner: string; project_contributors: string }>
+    project_id: number,
+    updates: Partial<{ project_name: string, project_description: string; project_owner: string; project_contributors: string }>
   ): Promise<void> {
     try {
       await this.client('ios-table')
-        .where({ project_name }) 
+        .where({ project_id }) 
         .update(updates); 
       console.log(`Project updated successfully.`);
     } catch (error) {
@@ -52,22 +52,22 @@ export class DatabaseHandler {
     }
   }
 
-  async deleteProject(project_name: string, project_description: string, project_owner: string, project_contributors: string ): Promise<void> {
+  async deleteProject(project_id: number ): Promise<void> {
     try {
-      await this.client('ios-table').where({ project_name, project_description, project_owner, project_contributors  }).del();
-      console.log(`Comment deleted successfully.`);
+      await this.client('ios-table').where({ project_id }).del();
+      console.log(`Project deleted successfully.`);
     } catch (error) {
       console.error('Error deleting value:', error);
       throw error;
     }
   }
 
-  async getProjects(): Promise<{ project_name: string, project_description: string, project_owner: string, project_contributors: string }[]> {
+  async getProjects(): Promise<{ project_id: number, project_name: string, project_description: string, project_owner: string, project_contributors: string }[]> {
     try {
-      const comments = await this.client('ios-table').select('project_name', 'project_description', 'project_owner', 'project_contributors');
-      return comments;
+      const projects = await this.client('ios-table').select('project_id', 'project_name', 'project_description', 'project_owner', 'project_contributors');
+      return projects;
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.error('Error fetching projects:', error);
       throw error;
     }
   }

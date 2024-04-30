@@ -4,7 +4,7 @@ import { ItemCardGrid, ItemCardHeader } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { makeStyles } from '@material-ui/core/styles';
-import { UpdateProjectDialog } from '../UpdateProjectDialog'; 
+import { UpdateProjectDialog } from '../UpdateProjectDialog';
 
 const useStyles = makeStyles({
   grid: {
@@ -41,27 +41,11 @@ export const Projects = () => {
     fetchProjects();
   }, [iosApi]);
 
-  const handleDeleteProject = async (
-    project_name,
-    project_description,
-    project_owner,
-    project_contributors
-  ) => {
+  const handleDeleteProject = async (project_id) => {
     try {
-      await iosApi.deleteProject(
-        project_name,
-        project_description,
-        project_owner,
-        project_contributors
-      );
+      await iosApi.deleteProject(project_id);
 
-      const updatedProjects = projects.filter(
-        (p) =>
-          p.project_name !== project_name ||
-          p.project_description !== project_description ||
-          p.project_owner !== project_owner ||
-          p.project_contributors !== project_contributors
-      );
+      const updatedProjects = projects.filter((p) => p.project_id !== project_id);
       setProjects(updatedProjects);
     } catch (error) {
       console.error('Error deleting project:', error);
@@ -69,8 +53,8 @@ export const Projects = () => {
   };
 
   const handleUpdateProject = (project) => {
-    setSelectedProject(project); 
-    setOpenUpdateDialog(true);   
+    setSelectedProject(project);
+    setOpenUpdateDialog(true);
   };
 
   return (
@@ -91,19 +75,14 @@ export const Projects = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => handleUpdateProject(project)} 
+                onClick={() => handleUpdateProject(project)}
               >
                 Update
               </Button>
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => handleDeleteProject(
-                  project.project_name,
-                  project.project_description,
-                  project.project_owner,
-                  project.project_contributors
-                )}
+                onClick={() => handleDeleteProject(project.project_id)}
               >
                 Delete
               </Button>
@@ -115,18 +94,22 @@ export const Projects = () => {
       <UpdateProjectDialog
         open={openUpdateDialog}
         project={selectedProject}
-        onClose={() => setOpenUpdateDialog(false)} 
-        onSubmit={() => {
-          setOpenUpdateDialog(false); 
-          const fetchProjects = async () => {
-            try {
-              const projectData = await iosApi.getProjects();
-              setProjects(projectData);
-            } catch (error) {
-              console.error('Error fetching projects:', error);
-            }
-          };
-          fetchProjects();
+        onClose={() => setOpenUpdateDialog(false)}
+        onSubmit={async (updatedData) => {
+          setOpenUpdateDialog(false);
+          try {
+            await iosApi.updateProject(selectedProject.project_id, 
+              updatedData.project_name, 
+              updatedData.project_description, 
+              updatedData.project_owner,
+              updatedData.project_contributors
+              );
+
+            const projectData = await iosApi.getProjects();
+            setProjects(projectData);
+          } catch (error) {
+            console.error('Error updating project:', error);
+          }
         }}
       />
     </>

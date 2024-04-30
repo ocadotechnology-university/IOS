@@ -29,30 +29,20 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
     }
   }, [project]); 
 
-  const handleSubmit = async () => {
-    try {
-      await iosApi.updateProject(
-        project_name,
-        project_description,
-        project_owner,
-        project_contributors
-      );
-
-      onSubmit(
-        project_name,
-        project_description,
-        project_owner,
-        project_contributors
-      );
-
-      onClose(); 
-    } catch (error) {
-      console.error('Error updating project:', error);
-    }
+  const handleSubmit = () => {
+    const updatedData = {
+      project_name,
+      project_description,
+      project_owner,
+      project_contributors,
+    };
+  
+    onSubmit(updatedData); 
+    onClose(); 
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Update Project</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <TextField

@@ -5,13 +5,30 @@ export const iosApiRef = createApiRef<IosApi>({
 });
 
 export type IosIn = {
-  username: string
-  comment: string
+  project_id: number,
+  project_name: string,
+  project_description: string,
+  project_owner: string,
+  project_contributors: string
 }
 
 export interface IosApi {
-  insertComment(username: string, comment: string): Promise<void>;
-  deleteComment(username: string, comment: string): Promise<void>;
+  insertProject(
+    project_name: string, 
+    project_description: string, 
+    project_owner: string, 
+    project_contributors: string): Promise<void>;
+
+  deleteProject(project_id: number): Promise<void>;
+
+  updateProject(
+    project_id: number, 
+    project_name: string,
+    project_description: string,
+    project_owner: string,
+    project_contributors: string): Promise<void>;
+
+  getProjects(): Promise <IosIn[]>;
 }
 
 export class IosClient implements IosApi {
@@ -62,19 +79,13 @@ export class IosClient implements IosApi {
   
   
   async deleteProject(    
-    project_name: string,
-    project_description: string,
-    project_owner: string,
-    project_contributors: string
+    project_id: number
     ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/db/`;
 
     const payload = {
-      project_name,
-      project_description,
-      project_owner,
-      project_contributors
+      project_id
     };
 
     const response = await this.fetchApi.fetch(url, {
@@ -100,7 +111,8 @@ export class IosClient implements IosApi {
       .then(res => res.json());
   }
 
-  async updateProject(    
+  async updateProject(
+    project_id: number,    
     project_name: string,
     project_description: string,
     project_owner: string,
@@ -110,6 +122,7 @@ export class IosClient implements IosApi {
     const url = `${baseUrl}/db`;
     
     const payload = {
+      project_id,
       project_name,
       project_description,
       project_owner,

@@ -4,6 +4,7 @@
  */
 exports.up = function(knex) {
     return knex.schema.createTable('ios-table', function(table){
+        table.increments('project_id');
         table.string('project_name');
         table.string('project_description');
         table.string('project_owner');

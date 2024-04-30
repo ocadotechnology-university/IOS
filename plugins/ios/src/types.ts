@@ -1,3 +1,5 @@
 export type Member = {
-    userId: string
+    itemId: number;
+    userId: string;
+    userRef?: string;
 }

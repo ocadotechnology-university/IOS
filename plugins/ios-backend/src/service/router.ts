@@ -47,10 +47,14 @@ export async function createRouter(
   
 
   router.put('/db', async (request, response) => {
-    const { project_name, project_description, project_owner, project_contributors } = request.body;
+    const { project_id, project_name, project_description, project_owner, project_contributors } = request.body;
   
-    const updates: { project_description?: string; project_owner?: string; project_contributors?: string } = {};
-  
+    const updates: { project_name?: string, project_description?: string; project_owner?: string; project_contributors?: string } = {};
+    
+    if (project_name){
+      updates.project_name = project_name;
+    }
+
     if (project_description) {
       updates.project_description = project_description;
     }
@@ -64,7 +68,7 @@ export async function createRouter(
     }
   
     try {
-      await dbHandler.updateProject(project_name, updates);
+      await dbHandler.updateProject(project_id, updates);
       response.status(200).send('Project updated successfully.');
     } catch (error) {
       console.error('Error updating project:', error);
@@ -73,10 +77,10 @@ export async function createRouter(
   });
 
   router.delete('/db', async (request, response) => {
-    const { project_name, project_description, project_owner, project_contributors } = request.body;
+    const { project_id } = request.body;
 
     try {
-      await dbHandler.deleteProject(project_name, project_description, project_owner, project_contributors);
+      await dbHandler.deleteProject(project_id);
       response.status(200).send(`Value deleted successfully.`);
     } catch (error) {
       console.error('Error deleting value:', error);
@@ -87,10 +91,10 @@ export async function createRouter(
 
   router.get('/db', async (_, response) => {
     try {
-      const comments = await dbHandler.getProjects();
-      response.status(200).json(comments);
+      const projects = await dbHandler.getProjects();
+      response.status(200).json(projects);
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.error('Error fetching projects:', error);
       response.status(500).send('Internal server error');
     }
   });
