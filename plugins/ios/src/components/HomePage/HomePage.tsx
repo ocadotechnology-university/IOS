@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Typography, Grid, Button } from '@material-ui/core';
+import { Grid, Button } from '@material-ui/core';
 import {
-  InfoCard,
   Header,
   Page,
   Content,
@@ -13,13 +12,9 @@ import { ProjectComponent } from '../ProjectTable';
 import { AddProjectDialog } from '../AddCommentDialog/AddCommentDialog';
 import { Projects } from '../ProjectItemCards';
 
-interface CommentData {
-  title: string;
-  description: string;
-}
-
 export const ExampleComponent = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [shouldRerender, setShouldRerender] = useState(false);
 
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -27,10 +22,7 @@ export const ExampleComponent = () => {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
-  };
-
-  const handleSubmitComment = (title: string, description: string) => {
-    console.log('Submitted comment:', { title, description });
+    setShouldRerender((prev) => !prev); // Toggle to trigger re-render
   };
 
   return (
@@ -50,15 +42,18 @@ export const ExampleComponent = () => {
             </Button>
           </Grid>
           <Grid item>
-            <ProjectComponent />
+            <ProjectComponent key={shouldRerender} /> {/* Key to re-render */}
           </Grid> 
 
           <Grid item>
-            <Projects />
+            <Projects key={shouldRerender} /> {/* Key to re-render */}
           </Grid>
 
         </Grid>
-        <AddProjectDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmitComment} />
+        <AddProjectDialog 
+          open={dialogOpen} 
+          handleCloseDialog={handleCloseDialog} 
+        />
       </Content>
     </Page>
   );

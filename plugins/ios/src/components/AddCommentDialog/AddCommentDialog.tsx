@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-} from '@material-ui/core';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 
-// Define your styles
 const useStyles = makeStyles({
   dialogContent: {
     display: 'flex',
@@ -19,9 +11,14 @@ const useStyles = makeStyles({
   },
 });
 
-export const AddProjectDialog = ({ onSubmit }) => {
+type Props = {
+  open: boolean;
+  handleCloseDialog: () => void;
+};
+
+export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const classes = useStyles();
-  const [open, setOpen] = useState(false); // Dialog open state
+
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
   const [projectOwner, setProjectOwner] = useState('');
@@ -29,14 +26,6 @@ export const AddProjectDialog = ({ onSubmit }) => {
 
   const iosApi = useApi(iosApiRef);
 
-  // Toggle dialog open/close
-  const toggleDialog = () => {
-    setOpen(!open); // Toggle the state
-  };
-
-  const handleClose = () => {
-    setOpen(false); // Set open to false to close the dialog
-  };
 
   const handleSubmit = async () => {
     try {
@@ -46,40 +35,28 @@ export const AddProjectDialog = ({ onSubmit }) => {
         projectOwner,
         projectContributors
       );
-
-      onSubmit(
-        projectName,
-        projectDescription,
-        projectOwner,
-        projectContributors
-      );
-
-      // Reset the form
-      setProjectName('');
-      setProjectDescription('');
-      setProjectOwner('');
-      setProjectContributors('');
-
-      // Close the dialog after submission
-      handleClose();
+      handleCloseDialog(); 
     } catch (error) {
       console.error('Error adding project:', error);
+    } finally {
+      handleCloseDialog();
     }
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
       <DialogTitle>Add Project</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <TextField
           label="Project Name"
-          value={project_name}
+          value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
           margin="normal"
+          required
         />
         <TextField
           label="Project Description"
-          value={project_description}
+          value={projectDescription}
           onChange={(e) => setProjectDescription(e.target.value)}
           multiline
           rows={4}
@@ -87,13 +64,13 @@ export const AddProjectDialog = ({ onSubmit }) => {
         />
         <TextField
           label="Project Owner"
-          value={project_owner}
+          value={projectOwner}
           onChange={(e) => setProjectOwner(e.target.value)}
           margin="normal"
         />
         <TextField
           label="Project Contributors"
-          value={project_contributors}
+          value={projectContributors}
           onChange={(e) => setProjectContributors(e.target.value)}
           multiline
           rows={2}
@@ -101,18 +78,13 @@ export const AddProjectDialog = ({ onSubmit }) => {
         />
       </DialogContent>
       <DialogActions>
-        <Button
-          onClick={handleSubmit} 
-          color="primary"
-        >
+        <Button onClick={handleSubmit} color="primary">
           Submit
         </Button>
-        <Button onClick={handleClose} color="primary">
+        <Button onClick={handleCloseDialog} color="primary">
           Cancel
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
-
-
