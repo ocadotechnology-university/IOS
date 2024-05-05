@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { useApi } from '@backstage/core-plugin-api';
+import { useApi, identityApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 
 const useStyles = makeStyles({
@@ -23,7 +23,6 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const [projectDescription, setProjectDescription] = useState('');
   const [projectOwner, setProjectOwner] = useState('');
   const [projectContributors, setProjectContributors] = useState('');
-
   const iosApi = useApi(iosApiRef);
 
 
