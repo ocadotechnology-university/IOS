@@ -27,6 +27,8 @@ export const Projects = () => {
 
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [shouldRerender, setShouldRerender] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -51,6 +53,7 @@ export const Projects = () => {
       console.error('Error deleting project:', error);
     }
   };
+
 
   const handleUpdateProject = (project) => {
     setSelectedProject(project);
@@ -102,11 +105,12 @@ export const Projects = () => {
               updatedData.project_name, 
               updatedData.project_description, 
               updatedData.project_owner,
-              updatedData.project_contributors
+              updatedData.project_contributorss
               );
 
             const projectData = await iosApi.getProjects();
             setProjects(projectData);
+            setShouldRerender((prev) => !prev);
           } catch (error) {
             console.error('Error updating project:', error);
           }

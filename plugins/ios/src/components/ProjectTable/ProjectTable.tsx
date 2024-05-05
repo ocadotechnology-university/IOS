@@ -4,7 +4,7 @@ import { Button } from '@material-ui/core';
 import { useApi } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 
-export const ProjectComponent = () => {
+export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
   const iosApi = useApi(iosApiRef);
 

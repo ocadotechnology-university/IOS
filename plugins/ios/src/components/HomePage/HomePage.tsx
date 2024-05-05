@@ -10,7 +10,7 @@ import {
   HeaderLabel,
   SupportButton,
 } from '@backstage/core-components';
-import { ProjectComponent } from '../ProjectTable';
+import { ProjectTable } from '../ProjectTable';
 import { AddProjectDialog } from '../AddCommentDialog/AddCommentDialog';
 import { Projects } from '../ProjectItemCards';
 
@@ -59,7 +59,11 @@ export const ExampleComponent = () => {
 
         <Grid container spacing={3} justifyContent="flex-end">
           <Grid item>
-            <Button variant="contained" color="primary" onClick={handleOpenDialog}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenDialog}
+            >
               Add Project
             </Button>
           </Grid>
@@ -68,7 +72,8 @@ export const ExampleComponent = () => {
             <IconButton
               aria-label="List View"
               size="small"
-              onClick={switchToListView} 
+              color={currentView === 'list' ? 'primary' : 'default'} // Conditional color
+              onClick={switchToListView}
             >
               <ViewHeadlineIcon />
             </IconButton>
@@ -78,7 +83,8 @@ export const ExampleComponent = () => {
             <IconButton
               aria-label="Card View"
               size="small"
-              onClick={switchToCardView} 
+              color={currentView === 'card' ? 'primary' : 'default'} // Conditional color
+              onClick={switchToCardView}
             >
               <AppsIcon />
             </IconButton>
@@ -86,9 +92,9 @@ export const ExampleComponent = () => {
         </Grid>
 
         <Grid container spacing={3} direction="column">
-          {currentView === 'list' ? ( 
+          {currentView === 'list' ? (
             <Grid item>
-              <ProjectComponent key={shouldRerender} />
+              <ProjectTable key={shouldRerender} />
             </Grid>
           ) : (
             <Grid item>
@@ -97,7 +103,10 @@ export const ExampleComponent = () => {
           )}
         </Grid>
 
-        <AddProjectDialog open={dialogOpen} handleCloseDialog={handleCloseDialog} />
+        <AddProjectDialog
+          open={dialogOpen}
+          handleCloseDialog={handleCloseDialog}
+        />
       </Content>
     </Page>
   );
