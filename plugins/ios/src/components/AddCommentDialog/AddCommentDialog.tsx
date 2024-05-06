@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
+import React, { useState, useEffect } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { useApi, identityApiRef } from '@backstage/core-plugin-api';
+import { useApi } from '@backstage/core-plugin-api';
+import { catalogApiRef } from '@backstage/plugin-catalog-react';
 import { iosApiRef } from '../../api';
-
 const useStyles = makeStyles({
   dialogContent: {
     display: 'flex',
@@ -32,7 +43,26 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const project_views = 0;
   const project_start_date = new Date();
 
+  const [users, setUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const catalogApi = useApi(catalogApiRef);
   const iosApi = useApi(iosApiRef);
+
+  useEffect(() => {
+    const fetchUsersAndGroups = async () => {
+      const userEntities = await catalogApi.getEntities({
+        filter: { kind: 'user' },
+      });
+      const groupEntities = await catalogApi.getEntities({
+        filter: { kind: 'group' },
+      });
+
+      setUsers(userEntities.items);
+      setGroups(groupEntities.items);
+    };
+
+    fetchUsersAndGroups();
+  }, [catalogApi]);
 
 
   const handleSubmit = async () => {
@@ -77,12 +107,22 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           rows={4}
           margin="normal"
         />
-        <TextField
-          label="Manager"
-          value={project_manager_username}
-          onChange={(e) => setProjectManagerUsername(e.target.value)}
-          margin="normal"
-        />
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Project Manager</InputLabel>
+          <Select
+            value={project_manager_username}
+            onChange={(e) => setProjectManagerUsername(e.target.value)}
+          >
+            {users.map((user) => (
+              <MenuItem
+                key={user.metadata.uid}
+                value={user.metadata.name}
+              >
+                {user.metadata.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <TextField
           label="Manager Link"
           value={project_manager_ref}
@@ -109,6 +149,24 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           rows={2}
           margin="normal"
         />
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Team Owner</InputLabel>
+          <Select
+            value={project_team_owner_name}
+            onChange={(e) => setProjectTeamOwnerName(e.target.value)}
+          >
+            {groups.map((group) => (
+              <MenuItem
+                key={group.metadata.uid}
+                value={group.metadata.name}
+              >
+                {group.metadata.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
 
         <TextField
           label="Team"

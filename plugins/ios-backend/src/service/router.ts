@@ -4,17 +4,19 @@ import express, { request, response } from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { DatabaseHandler } from './DatabaseHandler';
+import { IdentityApi } from '@backstage/plugin-auth-node';
 
 export interface RouterOptions {
   logger: Logger;
   config: Config;
   database: PluginDatabaseManager
+  identity: IdentityApi
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, database } = options;
+  const { logger, database, identity } = options;
   const dbHandler = await DatabaseHandler.create({ database });
 
   logger.info('Initializing IOS backend');
@@ -153,7 +155,34 @@ export async function createRouter(
     }
   });
   
-  router.use(errorHandler()); 
+  router.put('/projects/:project_id/members/:userId', async (request, response) => {
+    
+    const projet_id_str = request.params.project_id;
+    const project_id = parseInt(projet_id_str, 10); 
+    const userId = request.params.userId;
+    const user = await identity.getIdentity({ request: request });
 
+    try {
+      await dbHandler.addUser(project_id, userId, request.body?.user_avatar, user?.identity.userEntityRef);
+      response.status(200).send('User inserted succesfully.');
+    } catch (error) {
+      console.error('Error inserting user: ', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.get('/projects/:project_id/members', async (request, response) => {
+    const projet_id_str = request.params.project_id;
+    const project_id = parseInt(projet_id_str, 10);
+    try{ 
+      const users = await dbHandler.getUsersById(project_id);
+      response.status(200).json(users);
+    } catch (error) {
+      console.error('Error getting users: ', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.use(errorHandler()); 
   return router;
 }

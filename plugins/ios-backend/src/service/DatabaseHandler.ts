@@ -135,4 +135,30 @@ export class DatabaseHandler {
     }
   }
   
+  async addUser(
+    id: number,
+    userName: string,
+    userAvatar?: string,
+    userEntityRef?: string
+  ): Promise<void> {
+    await this.client.insert({
+      user_id: id,
+      username: userName,
+      user_avatar: userAvatar,
+      entity_ref: userEntityRef
+    }).into('ios-table-users');
+  }
+
+  async getUsersById(userId: number): Promise<Array<{ username: string; user_avatar: string; entity_ref: string }>> {
+    const result = await this.client
+      .select('username', 'user_avatar', 'entity_ref')
+      .from('ios-table-users')
+      .where('user_id', userId);
+    return result; 
+  }
+
+
+  
+
+
 }

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Table, TableColumn } from '@backstage/core-components';
 import { Button } from '@material-ui/core';
-import { useApi } from '@backstage/core-plugin-api';
+import { useApi, alertApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
 
 export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
   const iosApi = useApi(iosApiRef);
+  const alertApi = useApi(alertApiRef);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
 
@@ -30,6 +31,13 @@ export const ProjectTable = () => {
     } catch (error) {
       console.error('Error deleting project:', error);
     } finally{
+      console.log('${project_title}');
+      console.log('${project_id}');
+      alertApi.post({
+        message: 'Project has been deleted. ',
+        severity: 'success',
+        display: 'transient'
+      });
       fetchProjects();
     }
   };
@@ -93,6 +101,11 @@ export const ProjectTable = () => {
           } catch (error) {
             console.error('Error updating project:', error);
           } finally{
+            alertApi.post({
+              message: 'Project has been updated. ',
+              severity: 'success',
+              display: 'transient'
+            });
             fetchProjects();
           }
         }}

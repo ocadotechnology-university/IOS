@@ -1,17 +1,10 @@
 import { IdentityApi, DiscoveryApi, FetchApi, createApiRef } from '@backstage/core-plugin-api';
-import { Project } from './types';
+import { Member, Project } from './types';
 
 export const iosApiRef = createApiRef<IosApi>({
   id: 'ios',
 });
 
-export type IosIn = {
-  project_id: number,
-  project_name: string,
-  project_description: string,
-  project_owner: string,
-  project_contributors: string
-}
 
 export interface IosApi {
   insertProject(
@@ -40,7 +33,14 @@ export interface IosApi {
     project_team_owner_ref: string
     ) : Promise<void>;
 
-  getProjects(): Promise <Project[]>;
+  getProjects(
+
+  ): Promise <Project[]>;
+  getMembers(project_id: number): Promise <Member[]>
+  insertMember( 
+    project_id: number,
+    username: string
+  ): Promise <void>;
 }
 
 export class IosClient implements IosApi {
@@ -162,6 +162,37 @@ export class IosClient implements IosApi {
       body: JSON.stringify(payload) 
     });
 
+    return await response.json();
+  }
+
+  async getMembers(project_id: number) : Promise<Member[]>{
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/${project_id}/members`;
+    return await this.fetchApi
+      .fetch(url)
+      .then(res => res.json());
+  }
+
+  async insertMember(
+    project_id: number,
+    username: string,
+  ) : Promise <void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/${project_id}/members/${username}`;
+    const { user_avatar } = await this.identityApi.getProfileInfo();
+
+    const response = await this.fetchApi.fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(user_avatar) 
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Failed to insert member: ${response.statusText}`);
+    }
+  
     return await response.json();
   }
 
