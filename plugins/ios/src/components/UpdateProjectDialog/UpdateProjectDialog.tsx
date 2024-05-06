@@ -13,28 +13,40 @@ const useStyles = makeStyles({
 
 export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
   const classes = useStyles();
-  const [project_name, setProjectName] = useState('');
+  const [project_title, setProjectTitle] = useState('');
   const [project_description, setProjectDescription] = useState('');
-  const [project_owner, setProjectOwner] = useState('');
-  const [project_contributors, setProjectContributors] = useState('');
+  const [project_manager_username, setProjectManagerUsername] = useState('');
+  const [project_manager_ref, setProjectManagerRef] = useState('');
+  const [project_docs_ref, setProjectDocsRef] = useState('');
+  const [project_life_cycle_status, setProjectLifeCycleStatus] = useState('');
+  const [project_team_owner_name, setProjectTeamOwnerName] = useState('');
+  const [project_team_owner_ref, setProjectTeamOwnerRef] = useState('');
 
   const iosApi = useApi(iosApiRef);
 
   useEffect(() => {
     if (project) {
-      setProjectName(project.project_name);
+      setProjectTitle(project.project_title);
       setProjectDescription(project.project_description);
-      setProjectOwner(project.project_owner);
-      setProjectContributors(project.project_contributors);
+      setProjectManagerUsername(project.project_manager_username);
+      setProjectManagerRef(project.project_manager_ref);
+      setProjectDocsRef(project.project_docs_ref);
+      setProjectLifeCycleStatus(project.project_life_cycle_status);
+      setProjectTeamOwnerName(project.project_team_owner_name);
+      setProjectTeamOwnerRef(project.project_team_owner_ref);
     }
   }, [project]); 
 
   const handleSubmit = () => {
     const updatedData = {
-      project_name,
-      project_description,
-      project_owner,
-      project_contributors,
+      project_title, 
+      project_description, 
+      project_manager_username,
+      project_manager_ref,
+      project_docs_ref,
+      project_life_cycle_status,
+      project_team_owner_name,
+      project_team_owner_ref,
     };
   
     onSubmit(updatedData); 
@@ -46,9 +58,9 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
       <DialogTitle>Update Project</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <TextField
-          label="Project Name"
-          value={project_name}
-          onChange={(e) => setProjectName(e.target.value)}
+          label="Project Title"
+          value={project_title}
+          onChange={(e) => setProjectTitle(e.target.value)}          
           margin="normal"
         />
         <TextField
@@ -61,14 +73,48 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
         />
         <TextField
           label="Project Owner"
-          value={project_owner}
-          onChange={(e) => setProjectOwner(e.target.value)}
+          value={project_manager_username}
+          onChange={(e) => setProjectManagerUsername(e.target.value)}
           margin="normal"
         />
         <TextField
           label="Project Contributors"
-          value={project_contributors}
-          onChange={(e) => setProjectContributors(e.target.value)}
+          value={project_manager_ref}
+          onChange={(e) => setProjectManagerRef(e.target.value)}
+          multiline
+          rows={2}
+          margin="normal"
+        />
+        <TextField
+          label="Project Contributors"
+          value={project_docs_ref}
+          onChange={(e) => setProjectDocsRef(e.target.value)}
+          multiline
+          rows={2}
+          margin="normal"
+        />
+        <TextField
+          label="Project Contributors"
+          value={project_life_cycle_status}
+          onChange={(e) => setProjectLifeCycleStatus(e.target.value)}
+          multiline
+          rows={2}
+          margin="normal"
+        />
+        
+        <TextField
+          label="Project Contributors"
+          value={project_team_owner_name}
+          onChange={(e) => setProjectTeamOwnerName(e.target.value)}
+          multiline
+          rows={2}
+          margin="normal"
+        />
+
+        <TextField
+          label="Project Contributors"
+          value={project_team_owner_ref}
+          onChange={(e) => setProjectTeamOwnerRef(e.target.value)}
           multiline
           rows={2}
           margin="normal"

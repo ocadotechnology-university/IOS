@@ -115,6 +115,7 @@ export class DatabaseHandler {
   }[]> {
     try {
       const projects = await this.client('ios-table').select(
+        'project_id',
         'project_title', 
         'project_description', 
         'project_manager_username', 

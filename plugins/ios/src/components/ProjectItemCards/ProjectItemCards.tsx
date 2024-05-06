@@ -56,6 +56,7 @@ export const Projects = () => {
 
 
   const handleUpdateProject = (project) => {
+    console.log("Project selected for update:", project);
     setSelectedProject(project);
     setOpenUpdateDialog(true);
   };
@@ -64,15 +65,15 @@ export const Projects = () => {
     <>
       <ItemCardGrid className={classes.grid}>
         {projects.map((project) => (
-          <Card key={project.project_name} className={classes.card}>
+          <Card key={project.project_title} className={classes.card}>
             <CardMedia>
-              <ItemCardHeader title={project.project_name} subtitle={project.project_owner} />
+              <ItemCardHeader title={project.project_title} subtitle={project.project_manager_username} />
             </CardMedia>
             <CardContent>
               <Typography variant="body2">{project.project_description}</Typography>
             </CardContent>
             <CardContent>
-              <Typography variant="body2">{project.project_contributors}</Typography>
+              <Typography variant="body2">{project.project_team_owner_name}</Typography>
             </CardContent>
             <CardActions>
               <Button
@@ -93,7 +94,6 @@ export const Projects = () => {
           </Card>
         ))}
       </ItemCardGrid>
-
       <UpdateProjectDialog
         open={openUpdateDialog}
         project={selectedProject}
@@ -101,13 +101,21 @@ export const Projects = () => {
         onSubmit={async (updatedData) => {
           setOpenUpdateDialog(false);
           try {
-            await iosApi.updateProject(selectedProject.project_id, 
-              updatedData.project_name, 
-              updatedData.project_description, 
-              updatedData.project_owner,
-              updatedData.project_contributorss
-              );
-
+       
+            console.log('Project ID to update:', selectedProject?.project_id); 
+          
+            await iosApi.updateProject(
+              selectedProject.project_id, 
+              updatedData.project_title,
+              updatedData.project_description,
+              updatedData.project_manager_username,
+              updatedData.project_manager_ref,
+              updatedData.project_docs_ref,
+              updatedData.project_life_cycle_status,
+              updatedData.project_team_owner_name,
+              updatedData.project_team_owner_ref
+            );
+            
             const projectData = await iosApi.getProjects();
             setProjects(projectData);
             setShouldRerender((prev) => !prev);

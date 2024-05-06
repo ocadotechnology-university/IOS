@@ -63,9 +63,10 @@ export async function createRouter(
   });
   
 
-  router.put('/projects', async (request, response) => {
+  router.put('/projects/:project_id', async (request, response) => {
+    const project_id_str = request.params.project_id;
+    const project_id = parseInt(project_id_str, 10); 
     const {
-      project_id, 
       project_title, 
       project_description, 
       project_manager_username,

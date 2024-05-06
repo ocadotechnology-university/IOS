@@ -141,10 +141,9 @@ export class IosClient implements IosApi {
     project_team_owner_ref?: string,
     ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/db`;
+    const url = `${baseUrl}/projects/${project_id}`;
     
     const payload = {
-      project_id, 
       project_title, 
       project_description, 
       project_manager_username,
