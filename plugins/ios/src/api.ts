@@ -1,4 +1,5 @@
 import { IdentityApi, DiscoveryApi, FetchApi, createApiRef } from '@backstage/core-plugin-api';
+import { Project } from './types';
 
 export const iosApiRef = createApiRef<IosApi>({
   id: 'ios',
@@ -14,21 +15,32 @@ export type IosIn = {
 
 export interface IosApi {
   insertProject(
-    project_name: string, 
+    project_title: string, 
     project_description: string, 
-    project_owner: string, 
-    project_contributors: string): Promise<void>;
+    project_manager_username: string,
+    project_manager_ref: string,
+    project_docs_ref: string,
+    project_life_cycle_status: string,
+    project_team_owner_name: string,
+    project_team_owner_ref: string,
+    project_start_date: Date
+    ) : Promise<void>;
 
   deleteProject(project_id: number): Promise<void>;
 
   updateProject(
-    project_id: number, 
-    project_name: string,
-    project_description: string,
-    project_owner: string,
-    project_contributors: string): Promise<void>;
+    project_id: number,
+    project_title: string, 
+    project_description: string, 
+    project_manager_username: string, 
+    project_manager_ref: string,
+    project_docs_ref: string,
+    project_life_cycle_status: string,
+    project_team_owner_name: string,
+    project_team_owner_ref: string
+    ) : Promise<void>;
 
-  getProjects(): Promise <IosIn[]>;
+  getProjects(): Promise <Project[]>;
 }
 
 export class IosClient implements IosApi {
@@ -47,19 +59,33 @@ export class IosClient implements IosApi {
   }
 
   async insertProject(
-    project_name: string,
-    project_description: string,
-    project_owner: string,
-    project_contributors: string
+    project_title: string, 
+    project_description: string, 
+    project_manager_username: string, 
+    project_manager_ref: string,
+    project_docs_ref: string,
+    project_life_cycle_status: string,
+    project_team_owner_name: string,
+    project_team_owner_ref: string,
+    project_rating: number,
+    project_views: number,
+    project_start_date: Date,
   ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/db/`;
+    const url = `${baseUrl}/projects/`;
   
     const payload = {
-      project_name,
-      project_description,
-      project_owner,
-      project_contributors
+      project_title, 
+      project_description, 
+      project_manager_username, 
+      project_manager_ref,
+      project_docs_ref,
+      project_life_cycle_status,
+      project_team_owner_name,
+      project_team_owner_ref,
+      project_rating,
+      project_views,
+      project_start_date
     };
   
     const response = await this.fetchApi.fetch(url, {
@@ -71,7 +97,7 @@ export class IosClient implements IosApi {
     });
   
     if (!response.ok) {
-      throw new Error(`Failed to insert comment: ${response.statusText}`);
+      throw new Error(`Failed to insert project: ${response.statusText}`);
     }
   
     return await response.json();
@@ -82,51 +108,51 @@ export class IosClient implements IosApi {
     project_id: number
     ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/db/`;
-
-    const payload = {
-      project_id
-    };
+    const url = `${baseUrl}/projects/${project_id}`;
 
     const response = await this.fetchApi.fetch(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload) 
     });
-
+    
     if (!response.ok) {
-      throw new Error(`Failed to delete comment: ${response.statusText}`);
+      throw new Error(`Failed to delete project: ${response.statusText}`);
     }
   
     return await response.json();
   }
 
-  async getProjects(): Promise<IosIn[]> {
+  async getProjects(): Promise<Project[]> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/db`;
+    const url = `${baseUrl}/projects`;
     return await this.fetchApi
       .fetch(url)
       .then(res => res.json());
   }
 
   async updateProject(
-    project_id: number,    
-    project_name: string,
-    project_description: string,
-    project_owner: string,
-    project_contributors: string
+    project_id: number,
+    project_title?: string, 
+    project_description?: string, 
+    project_manager_username?: string,
+    project_manager_ref?: string,
+    project_docs_ref?: string,
+    project_life_cycle_status?: string,
+    project_team_owner_name?: string,
+    project_team_owner_ref?: string,
     ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/db`;
     
     const payload = {
-      project_id,
-      project_name,
-      project_description,
-      project_owner,
-      project_contributors
+      project_id, 
+      project_title, 
+      project_description, 
+      project_manager_username,
+      project_manager_ref,
+      project_docs_ref,
+      project_life_cycle_status,
+      project_team_owner_name,
+      project_team_owner_ref,
     };
     
     const response = await this.fetchApi.fetch(url, {

@@ -27,9 +27,36 @@ export class DatabaseHandler {
     this.client = client;
   }
 
-  async insertProject(project_name: string, project_description: string, project_owner: string, project_contributors: string): Promise<void> {
+  async insertProject(
+    project_title: string, 
+    project_description: string, 
+    project_manager_username: string,
+    project_manager_ref: string,
+    project_docs_ref: string,
+    project_life_cycle_status: string,
+    project_team_owner_name: string,
+    project_team_owner_ref: string,
+    project_rating: number,
+    project_views: number,
+    project_start_date: Date, 
+
+      ): Promise<void> {
     try {
-      await this.client('ios-table').insert({ project_name, project_description, project_owner, project_contributors }); 
+      await this.client('ios-table')
+        .insert({ 
+          project_title, 
+          project_description, 
+          project_manager_username, 
+          project_manager_ref,
+          project_docs_ref,
+          project_life_cycle_status,
+          project_team_owner_name,
+          project_team_owner_ref,
+          project_rating,
+          project_views,
+          project_start_date,
+
+        }); 
       console.log(`Project inserted succesfully`);
     } catch (error) {
       console.error('Error inserting Project:', error);
@@ -39,7 +66,17 @@ export class DatabaseHandler {
 
   async updateProject(
     project_id: number,
-    updates: Partial<{ project_name: string, project_description: string; project_owner: string; project_contributors: string }>
+    updates: Partial<{ 
+      project_title: string, 
+      project_description: string, 
+      project_manager_username: string, 
+      project_manager_ref: string,
+      project_docs_ref: string,
+      project_life_cycle_status: string,
+      project_team_owner_name: string,
+      project_team_owner_ref: string,
+
+    }>
   ): Promise<void> {
     try {
       await this.client('ios-table')
@@ -62,9 +99,34 @@ export class DatabaseHandler {
     }
   }
 
-  async getProjects(): Promise<{ project_id: number, project_name: string, project_description: string, project_owner: string, project_contributors: string }[]> {
+  async getProjects(): Promise<{ 
+    project_id: number,
+    project_title: string, 
+    project_description: string, 
+    project_manager_username: string,
+    project_manager_ref: string,
+    project_docs_ref: string,
+    project_life_cycle_status: string,
+    project_team_owner_name: string,
+    project_team_owner_ref: string,
+    project_rating: number,
+    project_views: number,
+    project_start_date: Date, 
+  }[]> {
     try {
-      const projects = await this.client('ios-table').select('project_id', 'project_name', 'project_description', 'project_owner', 'project_contributors');
+      const projects = await this.client('ios-table').select(
+        'project_title', 
+        'project_description', 
+        'project_manager_username', 
+        'project_manager_ref',
+        'project_docs_ref',
+        'project_life_cycle_status',
+        'project_team_owner_name',
+        'project_team_owner_ref',
+        'project_rating',
+        'project_views',
+        'project_start_date',
+      );
       return projects;
     } catch (error) {
       console.error('Error fetching projects:', error);

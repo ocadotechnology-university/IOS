@@ -14,7 +14,7 @@ export interface RouterOptions {
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, config, database } = options;
+  const { logger, database } = options;
   const dbHandler = await DatabaseHandler.create({ database });
 
   logger.info('Initializing IOS backend');
@@ -27,17 +27,34 @@ export async function createRouter(
     response.json({ status: 'ok' });
   });
 
-  router.get('/config/:configId', (request, response) => {
-    const { configId } = request.params;
-    logger.info('Get read config request');
-    const value = config.getOptionalString(`ios.${configId}`);
-    response.json({ response: value });
-  });
-
-  router.post('/db', async (request, response) => {
-    const { project_name, project_description, project_owner, project_contributors } = request.body;
+  router.post('/projects', async (request, response) => {
+    const { 
+      project_title, 
+      project_description, 
+      project_manager_username, 
+      project_manager_ref,
+      project_docs_ref,
+      project_life_cycle_status,
+      project_team_owner_name,
+      project_team_owner_ref,
+      project_rating,
+      project_views,
+      project_start_date,
+    } = request.body;
     try {
-      await dbHandler.insertProject(project_name, project_description, project_owner, project_contributors);
+      await dbHandler.insertProject(
+        project_title, 
+        project_description, 
+        project_manager_username, 
+        project_manager_ref,
+        project_docs_ref,
+        project_life_cycle_status,
+        project_team_owner_name,
+        project_team_owner_ref,
+        project_rating,
+        project_views,
+        project_start_date,
+      );
       response.status(200).send('Project inserted successfully.');
     } catch (error) {
       console.error('Error inserting project:', error);
@@ -46,27 +63,62 @@ export async function createRouter(
   });
   
 
-  router.put('/db', async (request, response) => {
-    const { project_id, project_name, project_description, project_owner, project_contributors } = request.body;
+  router.put('/projects', async (request, response) => {
+    const {
+      project_id, 
+      project_title, 
+      project_description, 
+      project_manager_username,
+      project_manager_ref,
+      project_docs_ref,
+      project_life_cycle_status,
+      project_team_owner_name,
+      project_team_owner_ref,
+    } = request.body;
   
-    const updates: { project_name?: string, project_description?: string; project_owner?: string; project_contributors?: string } = {};
+    const updates: { 
+      project_title?: string, 
+      project_description?: string, 
+      project_manager_username?: string, 
+      project_manager_ref?: string,
+      project_docs_ref?: string,
+      project_life_cycle_status?: string,
+      project_team_owner_name?: string,
+      project_team_owner_ref?: string,
+    } = {};
     
-    if (project_name){
-      updates.project_name = project_name;
+    if (project_title){
+      updates.project_title = project_title;
     }
 
     if (project_description) {
       updates.project_description = project_description;
     }
   
-    if (project_owner) {
-      updates.project_owner = project_owner;
+    if (project_manager_username) {
+      updates.project_manager_username = project_manager_username;
     }
   
-    if (project_contributors) {
-      updates.project_contributors = project_contributors;
+    if (project_manager_ref) {
+      updates.project_manager_ref = project_manager_ref;
     }
   
+    if (project_docs_ref) {
+      updates.project_docs_ref = project_docs_ref;
+    }
+
+    if (project_life_cycle_status) {
+      updates.project_life_cycle_status = project_life_cycle_status;
+    }
+
+    if (project_team_owner_name) {
+      updates.project_team_owner_name = project_team_owner_name;
+    }
+
+    if (project_team_owner_ref) {
+      updates.project_team_owner_ref = project_team_owner_ref;
+    }
+
     try {
       await dbHandler.updateProject(project_id, updates);
       response.status(200).send('Project updated successfully.');
@@ -76,8 +128,9 @@ export async function createRouter(
     }
   });
 
-  router.delete('/db', async (request, response) => {
-    const { project_id } = request.body;
+  router.delete('/projects/:project_id', async (request, response) => {
+    const project_id_str = request.params.project_id;
+    const project_id = parseInt(project_id_str, 10); 
 
     try {
       await dbHandler.deleteProject(project_id);
@@ -89,7 +142,7 @@ export async function createRouter(
   });
 
 
-  router.get('/db', async (_, response) => {
+  router.get('/projects', async (_, response) => {
     try {
       const projects = await dbHandler.getProjects();
       response.status(200).json(projects);
