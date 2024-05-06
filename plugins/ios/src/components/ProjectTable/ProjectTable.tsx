@@ -3,85 +3,100 @@ import { Table, TableColumn } from '@backstage/core-components';
 import { Button } from '@material-ui/core';
 import { useApi } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
+import { UpdateProjectDialog } from '../UpdateProjectDialog';
 
 export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
   const iosApi = useApi(iosApiRef);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const projectData = await iosApi.getProjects(); 
-        setProjects(projectData);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
-    };
-
-    fetchProjects(); 
-  }, [iosApi]);
-
-  const handleDeleteProject = async (
-    project_name: string,
-    project_description: string,
-    project_owner: string,
-    project_contributors: string
-  ) => {
+  const fetchProjects = async () => {
     try {
-      await iosApi.deleteProject(
-        project_name,
-        project_description,
-        project_owner,
-        project_contributors
-      );
-
-      const updatedProjects = projects.filter(
-        p =>
-          p.project_name !== project_name ||
-          p.project_description !== project_description ||
-          p.project_owner !== project_owner ||
-          p.project_contributors !== project_contributors
-      );
-      setProjects(updatedProjects); 
+      const projectData = await iosApi.getProjects();
+      setProjects(projectData);
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error('Error fetching projects:', error);
     }
   };
 
+  useEffect(() => {
+    fetchProjects(); 
+  }, []);
+
+  const handleDeleteProject = async (project_id) => {
+    try {
+      await iosApi.deleteProject(project_id);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    } finally{
+      fetchProjects();
+    }
+  };
+
+  const handleUpdateProject = (project) => {
+    setSelectedProject(project);
+    setOpenUpdateDialog(true);
+  };
+
   const columns: TableColumn[] = [
-    { title: 'Project Name', field: 'project_name' },
+    { title: 'Project Title', field: 'project_title' },
     { title: 'Project Description', field: 'project_description' },
-    { title: 'Project Owner', field: 'project_owner' },
-    { title: 'Project Contributors', field: 'project_contributors' },
+    { title: 'Project Manager', field: 'project_manager_username' },
+    { title: 'Project Team Owner', field: 'project_team_owner_name' },
     {
       title: 'Actions',
       field: 'actions',
-      render: rowData => (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            handleDeleteProject(
-              rowData.project_name,
-              rowData.project_description,
-              rowData.project_owner,
-              rowData.project_contributors
-            )
-          }
-        >
-          Delete
-        </Button>
+      render: (rowData) => (
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleUpdateProject(rowData)}
+          >
+            Update
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => handleDeleteProject(rowData.project_id)}
+          >
+            Delete
+          </Button>
+        </>
       ),
     },
   ];
 
-  const data = projects.map(project => ({
-    project_name: project.project_name,
-    project_description: project.project_description,
-    project_owner: project.project_owner,
-    project_contributors: project.project_contributors,
-    actions: '',
-  }));
-
-  return <Table title="Projects" columns={columns} data={data} />;
+  return (
+    <>
+      <Table title="Projects" columns={columns} data={projects} />
+      <UpdateProjectDialog
+        open={openUpdateDialog}
+        project={selectedProject}
+        onClose={() => setOpenUpdateDialog(false)}
+        onSubmit={async (updatedData) => {
+          setOpenUpdateDialog(false);
+          try {
+            await iosApi.updateProject(
+              selectedProject.project_id,
+              updatedData.project_title,
+              updatedData.project_description,
+              updatedData.project_manager_username,
+              updatedData.project_manager_ref,
+              updatedData.project_docs_ref,
+              updatedData.project_life_cycle_status,
+              updatedData.project_team_owner_name,
+              updatedData.project_team_owner_ref
+            );
+             
+          } catch (error) {
+            console.error('Error updating project:', error);
+          } finally{
+            fetchProjects();
+          }
+        }}
+      />
+    </>
+  );
 };

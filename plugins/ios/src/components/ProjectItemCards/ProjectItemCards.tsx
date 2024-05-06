@@ -9,7 +9,7 @@ import { UpdateProjectDialog } from '../UpdateProjectDialog';
 const useStyles = makeStyles({
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
     gap: '16px',
   },
   card: {
@@ -27,36 +27,32 @@ export const Projects = () => {
 
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [shouldRerender, setShouldRerender] = useState(false);
+
+  // Define fetchProjects outside useEffect to be used across multiple functions
+  const fetchProjects = async () => {
+    try {
+      const projectData = await iosApi.getProjects();
+      setProjects(projectData);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const projectData = await iosApi.getProjects();
-        setProjects(projectData);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
-    };
-
     fetchProjects();
-  }, [iosApi]);
+  }, []);
 
   const handleDeleteProject = async (project_id) => {
     try {
       await iosApi.deleteProject(project_id);
-
-      const updatedProjects = projects.filter((p) => p.project_id !== project_id);
-      setProjects(updatedProjects);
     } catch (error) {
       console.error('Error deleting project:', error);
+    } finally{
+      fetchProjects();
     }
   };
 
-
-  const handleUpdateProject = (project) => {
-    console.log("Project selected for update:", project);
+  const handleUpdateProject = async (project) => {
     setSelectedProject(project);
     setOpenUpdateDialog(true);
   };
@@ -101,11 +97,8 @@ export const Projects = () => {
         onSubmit={async (updatedData) => {
           setOpenUpdateDialog(false);
           try {
-       
-            console.log('Project ID to update:', selectedProject?.project_id); 
-          
             await iosApi.updateProject(
-              selectedProject.project_id, 
+              selectedProject.project_id,
               updatedData.project_title,
               updatedData.project_description,
               updatedData.project_manager_username,
@@ -115,12 +108,10 @@ export const Projects = () => {
               updatedData.project_team_owner_name,
               updatedData.project_team_owner_ref
             );
-            
-            const projectData = await iosApi.getProjects();
-            setProjects(projectData);
-            setShouldRerender((prev) => !prev);
           } catch (error) {
             console.error('Error updating project:', error);
+          } finally{
+            fetchProjects();
           }
         }}
       />
