@@ -33,7 +33,7 @@ export const IosPage = iosPlugin.provide(
   createRoutableExtension({
     name: 'IosPage',
     component: () =>
-      import('./components/HomePage').then(m => m.ExampleComponent),
+      import('./components/IOS/HomePage').then(m => m.ExampleComponent),
     mountPoint: rootRouteRef,
   }),
 );

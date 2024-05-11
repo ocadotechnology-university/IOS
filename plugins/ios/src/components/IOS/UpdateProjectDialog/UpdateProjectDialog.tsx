@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
-import { iosApiRef } from '../../api';
+import { iosApiRef } from '../../../api';
 
 const useStyles = makeStyles({
   dialogContent: {

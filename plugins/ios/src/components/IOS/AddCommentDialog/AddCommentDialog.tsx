@@ -14,7 +14,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
-import { iosApiRef } from '../../api';
+import { iosApiRef } from '../../../api';
 const useStyles = makeStyles({
   dialogContent: {
     display: 'flex',
