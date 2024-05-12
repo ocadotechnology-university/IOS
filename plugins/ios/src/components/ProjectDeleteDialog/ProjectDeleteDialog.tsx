@@ -3,7 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mate
 import { iosApiRef } from '../../api';
 import { useApi, alertApiRef } from '@backstage/core-plugin-api';
 
-export const ProjectDeleteDialog = ({ project_id, onClose }) => {
+export const ProjectDeleteDialog = ({ project_id, onClose, onDeleteConfirmed }) => {
     const iosApi = useApi(iosApiRef);
     const alertApi = useApi(alertApiRef);
   
@@ -13,7 +13,7 @@ export const ProjectDeleteDialog = ({ project_id, onClose }) => {
       } catch (error) {
         console.error('Error deleting project:', error);
       } finally{
-        onClose()
+        onDeleteConfirmed(); 
         alertApi.post({
           message: 'Project has been deleted.',
           severity: 'success',

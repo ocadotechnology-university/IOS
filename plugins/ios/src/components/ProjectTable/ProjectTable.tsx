@@ -5,16 +5,16 @@ import { useApi, alertApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { ProjectOverview } from '../ProjectOverview';
 import { UpdateProjectDialog } from '../UpdateProjectDialog'; 
-import { ProjectDeleteDialog } from '../ProjectDeleteDialog'; // Import the ProjectDeleteDialog component
 
 export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+
   const [openProjectOverview, setOpenProjectOverview] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false); 
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false); // Define showDeleteDialog state
 
   const fetchProjects = async () => {
     try {
@@ -29,32 +29,20 @@ export const ProjectTable = () => {
     fetchProjects(); 
   }, []);
 
-  const handleDeleteProject = async (project_id) => {
-    try {
-      await iosApi.deleteProject(project_id);
-    } catch (error) {
-      console.error('Error deleting project:', error);
-    } finally {
-      alertApi.post({
-        message: 'Project has been deleted. ',
-        severity: 'success',
-        display: 'transient'
-      });
+  useEffect(() => {
+    if (!openProjectOverview) {
       fetchProjects();
     }
-  };
-  const handleProjectDeleted = () => {
-    setOpenProjectOverview(false); // Close the ProjectOverview dialog
-  };
-  
+  }, [openProjectOverview]);
 
   const handleUpdateProject = (project) => {
     setSelectedProject(project);
     setOpenUpdateDialog(true);
   };
 
-  const handleViewProject = (project) => {
+  const handleViewProject = (project, project_id) => {
     setSelectedProject(project);
+    setSelectedProjectId(project_id); // Set selected project_id
     setOpenProjectOverview(true);
     fetchProjects();
   };
@@ -72,7 +60,7 @@ export const ProjectTable = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleViewProject(rowData)}
+            onClick={() => handleViewProject(rowData, rowData.project_id)}
           >
             View Project
           </Button>
@@ -125,21 +113,12 @@ export const ProjectTable = () => {
           }
         }}
       />
-      {selectedProject && (
-        <ProjectOverview
-          open={openProjectOverview}
-          handleCloseDialog={() => setOpenProjectOverview(false)}
-          project={selectedProject}
-          project_id={selectedProject.project_id }
-        />
-      )}
-      {showDeleteDialog && (
-        <ProjectDeleteDialog
-          project_id={selectedProject.project_id}
-          onClose={() => setShowDeleteDialog(false)}
-        />
-      )}
-
+      <ProjectOverview
+        open={openProjectOverview}
+        handleCloseDialog={() => setOpenProjectOverview(false)}
+        project={selectedProject}
+        project_id={selectedProjectId} 
+      />
     </>
   );
 };
