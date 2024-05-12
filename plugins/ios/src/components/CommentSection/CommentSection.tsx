@@ -8,7 +8,7 @@ const imgLink =
 
 export const CommentSection = () => {
   return (
-    <div style={{ padding: 14 }} className="App">
+    <div className="App">
       <h1>Comments</h1>
       <Paper style={{ padding: "40px 20px" }}>
         <Grid container wrap="nowrap" spacing={2}>

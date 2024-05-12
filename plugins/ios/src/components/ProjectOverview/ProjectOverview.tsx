@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Grid, IconButton, TextField } from '@material-ui/core';
+import {  Dialog, DialogTitle, DialogContent, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { CommentSection } from '../CommentSection';
 import { ProjectInfo } from '../ProjectInfo';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { ProjectFiles } from '../ProjectFiles';
 
 type Props = {
   open: boolean;
@@ -40,6 +39,7 @@ export const ProjectOverview = ({ open, handleCloseDialog, project }: Props) => 
       <DialogTitle>Project Overview</DialogTitle>
       <DialogContent>
         <ProjectInfo project={project}  /> {/* Pass isEditable state to ProjectInfo */}
+        <ProjectFiles />
         <CommentSection />
       </DialogContent>
     </Dialog>
