@@ -1,14 +1,17 @@
+// ProjectOverview.jsx
 import React, { useState } from 'react';
-import {  Dialog, DialogTitle, DialogContent, } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { CommentSection } from '../CommentSection';
 import { ProjectInfo } from '../ProjectInfo';
 import { ProjectFiles } from '../ProjectFiles';
+import { ProjectDeleteDialog } from '../ProjectDeleteDialog'; 
 
 type Props = {
   open: boolean;
   handleCloseDialog: () => void;
   project: any;
+  project_id: string; 
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -19,12 +22,26 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const ProjectOverview = ({ open, handleCloseDialog, project }: Props) => {
+export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }: Props) => {
   const classes = useStyles();
-  const [isEditable, setIsEditable] = useState(false); // State to track edit mode
+  const [isEditable, setIsEditable] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); 
 
   const handleEditClick = () => {
-    setIsEditable(true); // Set edit mode to true
+    setIsEditable(true);
+  };
+
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false); 
+  };
+
+  const handleDeleteConfirmed = () => {
+    handleCloseDialog(); 
+    handleCloseDeleteDialog(); 
   };
 
   return (
@@ -38,11 +55,17 @@ export const ProjectOverview = ({ open, handleCloseDialog, project }: Props) => 
     >
       <DialogTitle>Project Overview</DialogTitle>
       <DialogContent>
-        <ProjectInfo project={project}  /> {/* Pass isEditable state to ProjectInfo */}
+        <ProjectInfo project={project} onDeleteClick={handleDeleteClick} /> 
         <ProjectFiles/>
         <CommentSection />
       </DialogContent>
+      {openDeleteDialog && (
+        <ProjectDeleteDialog
+          project_id={project_id}
+          onClose={handleCloseDeleteDialog}
+          onDeleteConfirmed={handleDeleteConfirmed} 
+        />
+      )}
     </Dialog>
   );
 };
-
