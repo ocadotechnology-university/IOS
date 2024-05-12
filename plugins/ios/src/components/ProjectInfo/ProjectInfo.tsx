@@ -26,10 +26,6 @@ export const ProjectInfo = ({ project, onDeleteClick }: Props) => {
     setOpenDeleteDialog(false); 
   };
 
-  const handleDeleteClick = () => {
-    setShowDeleteDialog(true);
-  };
-
   return (
     <Grid container spacing={2}>
       <Grid container justifyContent='flex-end'>
