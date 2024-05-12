@@ -1,0 +1,4 @@
+ project_id | project_title | project_description | project_manager_username | project_manager_ref | project_docs_ref | project_life_cycle_status | project_team_owner_name | project_team_owner_ref | project_rating | project_views | project_start_date 
+------------+---------------+---------------------+--------------------------+---------------------+------------------+---------------------------+-------------------------+------------------------+----------------+---------------+--------------------
+(0 rows)
+

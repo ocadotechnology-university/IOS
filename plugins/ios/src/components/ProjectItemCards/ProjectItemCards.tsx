@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import { ItemCardGrid, ItemCardHeader } from '@backstage/core-components';
 import { useApi, alertApiRef, identityApiRef } from '@backstage/core-plugin-api';
-import { iosApiRef } from '../../../api';
+import { iosApiRef } from '../../api';
 import { makeStyles } from '@material-ui/core/styles';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
 

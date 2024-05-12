@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, TableColumn } from '@backstage/core-components';
 import { Button } from '@material-ui/core';
 import { useApi, alertApiRef } from '@backstage/core-plugin-api';
-import { iosApiRef } from '../../../api';
+import { iosApiRef } from '../../api';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
 
 export const ProjectTable = () => {
