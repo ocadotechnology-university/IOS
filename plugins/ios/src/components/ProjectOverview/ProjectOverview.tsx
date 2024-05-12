@@ -39,7 +39,7 @@ export const ProjectOverview = ({ open, handleCloseDialog, project }: Props) => 
       <DialogTitle>Project Overview</DialogTitle>
       <DialogContent>
         <ProjectInfo project={project}  /> {/* Pass isEditable state to ProjectInfo */}
-        <ProjectFiles />
+        <ProjectFiles/>
         <CommentSection />
       </DialogContent>
     </Dialog>
