@@ -3,14 +3,16 @@ import { Table, TableColumn } from '@backstage/core-components';
 import { Button } from '@material-ui/core';
 import { useApi, alertApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
-import { UpdateProjectDialog } from '../UpdateProjectDialog';
+import { ProjectOverview } from '../ProjectOverview';
+import { UpdateProjectDialog } from '../UpdateProjectDialog'; // Import the UpdateProjectDialog component
 
 export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [openProjectOverview, setOpenProjectOverview] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false); // Add state for controlling the UpdateProjectDialog
 
   const fetchProjects = async () => {
     try {
@@ -30,9 +32,7 @@ export const ProjectTable = () => {
       await iosApi.deleteProject(project_id);
     } catch (error) {
       console.error('Error deleting project:', error);
-    } finally{
-      console.log('${project_title}');
-      console.log('${project_id}');
+    } finally {
       alertApi.post({
         message: 'Project has been deleted. ',
         severity: 'success',
@@ -47,6 +47,13 @@ export const ProjectTable = () => {
     setOpenUpdateDialog(true);
   };
 
+  
+  
+  const handleViewProject = (project) => {
+    setSelectedProject(project);
+    setOpenProjectOverview(true);
+  };
+
   const columns: TableColumn[] = [
     { title: 'Project Title', field: 'project_title' },
     { title: 'Project Description', field: 'project_description' },
@@ -57,6 +64,13 @@ export const ProjectTable = () => {
       field: 'actions',
       render: (rowData) => (
         <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleViewProject(rowData)}
+          >
+            View Project
+          </Button>
           <Button
             variant="contained"
             color="primary"
@@ -78,7 +92,19 @@ export const ProjectTable = () => {
 
   return (
     <>
-      <Table title="Projects" columns={columns} data={projects} />
+      <Table
+        title="Projects"
+        columns={columns}
+        data={projects}
+        options={{
+          rowStyle: {
+            cursor: 'pointer',
+          },
+          onRowClick: (event, rowData) => {
+            handleViewProject(rowData);
+          },
+        }}
+      />
       <UpdateProjectDialog
         open={openUpdateDialog}
         project={selectedProject}
@@ -97,10 +123,9 @@ export const ProjectTable = () => {
               updatedData.project_team_owner_name,
               updatedData.project_team_owner_ref
             );
-             
           } catch (error) {
             console.error('Error updating project:', error);
-          } finally{
+          } finally {
             alertApi.post({
               message: 'Project has been updated. ',
               severity: 'success',
@@ -109,6 +134,11 @@ export const ProjectTable = () => {
             fetchProjects();
           }
         }}
+      />
+      <ProjectOverview
+        open={openProjectOverview}
+        handleCloseDialog={() => setOpenProjectOverview(false)}
+        project={selectedProject}
       />
     </>
   );
