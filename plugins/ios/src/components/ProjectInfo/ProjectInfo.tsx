@@ -2,13 +2,18 @@ import React, {useState} from 'react';
 import { Grid, TextField, IconButton } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
 
+export const ProjectInfo = ({ project, project_id }) => {
 
-export const ProjectInfo = ({ project }) => {
-
-  const [isEditable, setIsEditable] = useState(false); // State to track edit mode    
+  const [isEditable, setIsEditable] = useState(false); // State to track edit mode  
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);  
   const handleEditClick = () => {
     setIsEditable(true); // Set edit mode to true
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
   };
 
   return (
@@ -25,9 +30,9 @@ export const ProjectInfo = ({ project }) => {
                 </IconButton>
             </Grid>
             <Grid item >
-                <IconButton size='medium'>
-                <DeleteIcon/>
-                </IconButton>
+              <IconButton size='medium' onClick={handleDeleteClick}>
+                <DeleteIcon />
+              </IconButton>
             </Grid>
         </Grid>
       <Grid item xs={3}>
@@ -102,6 +107,12 @@ export const ProjectInfo = ({ project }) => {
           disabled={!isEditable} 
         />
       </Grid>
+      {showDeleteDialog && (
+        <ProjectDeleteDialog
+          project_id={project_id}
+          onClose={() => setShowDeleteDialog(false)} 
+        />
+      )}
     </Grid>
   );
 };

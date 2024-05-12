@@ -9,6 +9,7 @@ type Props = {
   open: boolean;
   handleCloseDialog: () => void;
   project: any;
+  project_id: number;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -19,7 +20,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const ProjectOverview = ({ open, handleCloseDialog, project }: Props) => {
+export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }: Props) => {
+
   const classes = useStyles();
   const [isEditable, setIsEditable] = useState(false); // State to track edit mode
 
@@ -38,7 +40,7 @@ export const ProjectOverview = ({ open, handleCloseDialog, project }: Props) => 
     >
       <DialogTitle>Project Overview</DialogTitle>
       <DialogContent>
-        <ProjectInfo project={project}  /> {/* Pass isEditable state to ProjectInfo */}
+        <ProjectInfo project={project} project_id={project_id}  />
         <ProjectFiles/>
         <CommentSection />
       </DialogContent>

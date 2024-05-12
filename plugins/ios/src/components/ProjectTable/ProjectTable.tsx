@@ -4,7 +4,8 @@ import { Button } from '@material-ui/core';
 import { useApi, alertApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { ProjectOverview } from '../ProjectOverview';
-import { UpdateProjectDialog } from '../UpdateProjectDialog'; // Import the UpdateProjectDialog component
+import { UpdateProjectDialog } from '../UpdateProjectDialog'; 
+import { ProjectDeleteDialog } from '../ProjectDeleteDialog'; // Import the ProjectDeleteDialog component
 
 export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
@@ -12,7 +13,8 @@ export const ProjectTable = () => {
   const alertApi = useApi(alertApiRef);
   const [selectedProject, setSelectedProject] = useState(null);
   const [openProjectOverview, setOpenProjectOverview] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false); // Add state for controlling the UpdateProjectDialog
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false); 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false); // Define showDeleteDialog state
 
   const fetchProjects = async () => {
     try {
@@ -41,17 +43,20 @@ export const ProjectTable = () => {
       fetchProjects();
     }
   };
+  const handleProjectDeleted = () => {
+    setOpenProjectOverview(false); // Close the ProjectOverview dialog
+  };
+  
 
   const handleUpdateProject = (project) => {
     setSelectedProject(project);
     setOpenUpdateDialog(true);
   };
 
-  
-  
   const handleViewProject = (project) => {
     setSelectedProject(project);
     setOpenProjectOverview(true);
+    fetchProjects();
   };
 
   const columns: TableColumn[] = [
@@ -78,13 +83,6 @@ export const ProjectTable = () => {
           >
             Update
           </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => handleDeleteProject(rowData.project_id)}
-          >
-            Delete
-          </Button>
         </>
       ),
     },
@@ -96,14 +94,6 @@ export const ProjectTable = () => {
         title="Projects"
         columns={columns}
         data={projects}
-        options={{
-          rowStyle: {
-            cursor: 'pointer',
-          },
-          onRowClick: (event, rowData) => {
-            handleViewProject(rowData);
-          },
-        }}
       />
       <UpdateProjectDialog
         open={openUpdateDialog}
@@ -135,11 +125,21 @@ export const ProjectTable = () => {
           }
         }}
       />
-      <ProjectOverview
-        open={openProjectOverview}
-        handleCloseDialog={() => setOpenProjectOverview(false)}
-        project={selectedProject}
-      />
+      {selectedProject && (
+        <ProjectOverview
+          open={openProjectOverview}
+          handleCloseDialog={() => setOpenProjectOverview(false)}
+          project={selectedProject}
+          project_id={selectedProject.project_id }
+        />
+      )}
+      {showDeleteDialog && (
+        <ProjectDeleteDialog
+          project_id={selectedProject.project_id}
+          onClose={() => setShowDeleteDialog(false)}
+        />
+      )}
+
     </>
   );
 };
