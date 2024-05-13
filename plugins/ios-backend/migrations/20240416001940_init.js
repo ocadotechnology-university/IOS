@@ -15,7 +15,8 @@ exports.up = async function up(knex) {
         table.string('project_team_owner_ref').notNullable().comment("Reference to a team that owns a project");
         table.integer('project_rating').notNullable().comment("Number of starts project has");
         table.integer('project_views').notNullable().comment("Number of views project has");
-        table.date('project_start_date').notNullable().comment("Date of start of a project");
+        table.timestamp('project_start_date').notNullable().comment("Date and time of start of a project");
+        table.timestamp('project_update_date').notNullable().comment("Date and time of start of a project");
     });
     
     await knex.schema.createTable('ios-table-users', table => {

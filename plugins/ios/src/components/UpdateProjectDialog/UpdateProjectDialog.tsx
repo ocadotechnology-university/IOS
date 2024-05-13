@@ -61,7 +61,7 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
   const handleSubmit = () => {
     if (!isValidForm) {
       console.error('Invalid form data');
-      // Optionally, you can display an error message to the user
+      
       return;
     }
 

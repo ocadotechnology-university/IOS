@@ -3,26 +3,29 @@ import { Grid, TextField, IconButton } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
-import { UpdateProjectDialog } from '../UpdateProjectDialog'; // Import the UpdateProjectDialog component
+import { UpdateProjectDialog } from '../UpdateProjectDialog'; 
 import { useApi } from '@backstage/core-plugin-api';
-import { iosApiRef } from '../../api'; // Assuming you have defined the iosApiRef
+import { iosApiRef } from '../../api'; 
 import { alertApiRef } from '@backstage/core-plugin-api';
-
+import { TimeSinceUpdate } from '../DateTime';
+import { TimeToDate } from "../DateTime"
 type Props = {
   project: any;
   onDeleteClick: () => void;
-  fetchProjects: () => void; // Function to fetch projects, assuming you have it
+  fetchProjects: () => void; 
 };
 
 export const ProjectInfo = ({ project, onDeleteClick, fetchProjects }: Props) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(project); // Initialize selected project with current project
+  const [selectedProject, setSelectedProject] = useState(project); 
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
 
   const handleEditClick = () => {
-    setOpenUpdateDialog(true); // Open the edit dialog
+    setOpenUpdateDialog(true);
+
+
   };
 
   const handleDeleteClick = () => {
@@ -54,6 +57,24 @@ export const ProjectInfo = ({ project, onDeleteClick, fetchProjects }: Props) =>
       </Grid>
       <Grid item xs={2} md={12}>
         <h4 style={{ color: 'rgba(209, 205, 205, 1)' }}>{selectedProject.project_description}</h4>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <TextField
+          label="Last Updated"
+          value={TimeSinceUpdate({ updateDate: selectedProject.project_update_date })}
+          margin="normal"
+          fullWidth
+          disabled
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <TextField
+          label="Project Initialization Date:"
+          value={TimeToDate({startDate :selectedProject.project_start_date})}
+          margin="normal"
+          fullWidth
+          disabled
+        />
       </Grid>
       <Grid item xs={12} md={6}>
         <TextField
@@ -131,17 +152,17 @@ export const ProjectInfo = ({ project, onDeleteClick, fetchProjects }: Props) =>
       <UpdateProjectDialog
         open={openUpdateDialog}
         onClose={() => setOpenUpdateDialog(false)}
-        project={selectedProject} // Pass the selected project to the update dialog
+        project={selectedProject}
         onSubmit={async (updatedData) => {
           setOpenUpdateDialog(false);
           try {
-            // Update the project data in the component state
+          
             setSelectedProject({
               ...selectedProject,
               ...updatedData,
             });
 
-            // Update the project via API
+           
             await iosApi.updateProject(
               selectedProject.project_id,
               updatedData.project_title,

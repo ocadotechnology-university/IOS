@@ -42,7 +42,6 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
 
   const project_rating = 0;
   const project_views = 0;
-  const project_start_date = new Date();
 
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -90,7 +89,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const handleSubmit = async () => {
     if (!isFormValid()) {
       console.error('Invalid form data');
-      // Optionally, you can display an error message to the user
+      
       return;
     }
 
@@ -106,7 +105,6 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
         project_team_owner_ref,
         project_rating,
         project_views,
-        project_start_date,
       );
       handleCloseDialog();
     } catch (error) {

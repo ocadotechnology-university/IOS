@@ -38,31 +38,33 @@ export class DatabaseHandler {
     project_team_owner_ref: string,
     project_rating: number,
     project_views: number,
-    project_start_date: Date, 
-
-      ): Promise<void> {
+): Promise<void> {
     try {
-      await this.client('ios-table')
-        .insert({ 
-          project_title, 
-          project_description, 
-          project_manager_username, 
-          project_manager_ref,
-          project_docs_ref,
-          project_life_cycle_status,
-          project_team_owner_name,
-          project_team_owner_ref,
-          project_rating,
-          project_views,
-          project_start_date,
-
-        }); 
-      console.log(`Project inserted succesfully`);
+        const date = new Date();
+        const preciseStartDate = date.toISOString().slice(0, 19).replace('T', ' ');
+        
+        await this.client('ios-table')
+            .insert({ 
+                project_title, 
+                project_description, 
+                project_manager_username, 
+                project_manager_ref,
+                project_docs_ref,
+                project_life_cycle_status,
+                project_team_owner_name,
+                project_team_owner_ref,
+                project_rating,
+                project_views,
+                project_start_date: preciseStartDate, 
+                project_update_date: preciseStartDate,
+            }); 
+        console.log(`Project inserted successfully`);
     } catch (error) {
-      console.error('Error inserting Project:', error);
-      throw error;
+        console.error('Error inserting Project:', error);
+        throw error;
     }
-  }
+}
+
 
   async updateProject(
     project_id: number,
@@ -75,7 +77,7 @@ export class DatabaseHandler {
       project_life_cycle_status: string,
       project_team_owner_name: string,
       project_team_owner_ref: string,
-
+      project_update_date: Date
     }>
   ): Promise<void> {
     try {
@@ -111,7 +113,8 @@ export class DatabaseHandler {
     project_team_owner_ref: string,
     project_rating: number,
     project_views: number,
-    project_start_date: Date, 
+    project_start_date: Date,
+    project_update_date: Date 
   }[]> {
     try {
       const projects = await this.client('ios-table').select(
@@ -127,6 +130,7 @@ export class DatabaseHandler {
         'project_rating',
         'project_views',
         'project_start_date',
+        'project_update_date',
       );
       return projects;
     } catch (error) {

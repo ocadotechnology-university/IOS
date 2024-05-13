@@ -11,6 +11,7 @@ export type Project = {
     project_rating: number,
     project_views: number,
     project_start_date: Date, 
+    project_update_date: Date 
 }
 
 export type Member = {

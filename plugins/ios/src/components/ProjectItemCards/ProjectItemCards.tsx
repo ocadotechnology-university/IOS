@@ -25,10 +25,10 @@ const useStyles = makeStyles({
     minWidth: '300px',
     minHeight: '200px',
     maxHeight: '500px',
-    cursor: 'pointer', // Add cursor pointer to indicate clickable
+    cursor: 'pointer', 
   },
   description: {
-    wordWrap: 'break-word', // Allow long words to break and wrap onto the next line
+    wordWrap: 'break-word', 
   },
   noRecords: {
     textAlign: 'center',

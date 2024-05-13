@@ -37,7 +37,7 @@ export const ProjectTable = () => {
 
   const handleViewProject = (project, project_id) => {
     setSelectedProject(project);
-    setSelectedProjectId(project_id); // Set selected project_id
+    setSelectedProjectId(project_id); 
     setOpenProjectOverview(true);
   };
 

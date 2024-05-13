@@ -41,7 +41,7 @@ export async function createRouter(
       project_team_owner_ref,
       project_rating,
       project_views,
-      project_start_date,
+
     } = request.body;
     try {
       await dbHandler.insertProject(
@@ -54,8 +54,7 @@ export async function createRouter(
         project_team_owner_name,
         project_team_owner_ref,
         project_rating,
-        project_views,
-        project_start_date,
+        project_views
       );
       response.status(200).send('Project inserted successfully.');
     } catch (error) {
@@ -68,6 +67,7 @@ export async function createRouter(
   router.put('/projects/:project_id', async (request, response) => {
     const project_id_str = request.params.project_id;
     const project_id = parseInt(project_id_str, 10); 
+
     const {
       project_title, 
       project_description, 
@@ -79,6 +79,9 @@ export async function createRouter(
       project_team_owner_ref,
     } = request.body;
   
+    const date = new Date();
+    const project_update_date = date.toISOString().slice(0, 19).replace('T', ' ');
+
     const updates: { 
       project_title?: string, 
       project_description?: string, 
@@ -88,6 +91,7 @@ export async function createRouter(
       project_life_cycle_status?: string,
       project_team_owner_name?: string,
       project_team_owner_ref?: string,
+      project_update_date?: string 
     } = {};
     
     if (project_title){
@@ -122,10 +126,15 @@ export async function createRouter(
       updates.project_team_owner_ref = project_team_owner_ref;
     }
 
+    updates.project_update_date = project_update_date;
+
     try {
+    
       await dbHandler.updateProject(project_id, updates);
+     
       response.status(200).send('Project updated successfully.');
     } catch (error) {
+     
       console.error('Error updating project:', error);
       response.status(500).send('Internal server error.');
     }

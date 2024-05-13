@@ -16,7 +16,6 @@ export interface IosApi {
     project_life_cycle_status: string,
     project_team_owner_name: string,
     project_team_owner_ref: string,
-    project_start_date: Date
     ) : Promise<void>;
 
   deleteProject(project_id: number): Promise<void>;
@@ -69,7 +68,6 @@ export class IosClient implements IosApi {
     project_team_owner_ref: string,
     project_rating: number,
     project_views: number,
-    project_start_date: Date,
   ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/projects/`;
@@ -85,7 +83,6 @@ export class IosClient implements IosApi {
       project_team_owner_ref,
       project_rating,
       project_views,
-      project_start_date
     };
   
     const response = await this.fetchApi.fetch(url, {
