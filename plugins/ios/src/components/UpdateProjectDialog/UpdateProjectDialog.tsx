@@ -21,6 +21,8 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
   const [project_life_cycle_status, setProjectLifeCycleStatus] = useState('');
   const [project_team_owner_name, setProjectTeamOwnerName] = useState('');
   const [project_team_owner_ref, setProjectTeamOwnerRef] = useState('');
+  const [project_version, setProjectVersion] = useState('');
+
   const [isValidForm, setIsValidForm] = useState(false);
 
   const iosApi = useApi(iosApiRef);
@@ -35,6 +37,7 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
       setProjectLifeCycleStatus(project.project_life_cycle_status);
       setProjectTeamOwnerName(project.project_team_owner_name);
       setProjectTeamOwnerRef(project.project_team_owner_ref);
+      setProjectVersion(project.project_version || ''); // Handle null or undefined
     }
   }, [project]); 
 
@@ -47,11 +50,12 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
       project_team_owner_name.trim() !== '' &&
       project_manager_ref.trim() !== '' &&
       project_docs_ref.trim() !== '' &&
+      project_version.trim() !== '' && // Add validation for project_version
       (!project_manager_ref || isValidUrl(project_manager_ref)) &&
       (!project_docs_ref || isValidUrl(project_docs_ref)) &&
       isValidUrl(project_team_owner_ref)
     );
-  }, [project_title, project_description, project_manager_username, project_life_cycle_status, project_team_owner_name, project_manager_ref, project_docs_ref, project_team_owner_ref]);
+  }, [project_title, project_description, project_manager_username, project_life_cycle_status, project_team_owner_name, project_manager_ref, project_docs_ref, project_team_owner_ref, project_version]);
 
   const isValidUrl = (url) => {
     const urlPattern = /^https?:\/\/.*$/;
@@ -61,7 +65,6 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
   const handleSubmit = () => {
     if (!isValidForm) {
       console.error('Invalid form data');
-      
       return;
     }
 
@@ -74,6 +77,7 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
       project_life_cycle_status,
       project_team_owner_name,
       project_team_owner_ref,
+      project_version, // Include project_version in updatedData
     };
   
     onSubmit(updatedData); 
@@ -144,7 +148,6 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
           margin="normal"
           required
         />
-        
         <TextField
           label="Team Owner"
           value={project_team_owner_name}
@@ -154,7 +157,6 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
           margin="normal"
           required
         />
-
         <TextField
           label="Team Link"
           value={project_team_owner_ref}
@@ -169,6 +171,15 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
               ? 'Not a valid URL'
               : ''
           }
+        />
+        <TextField
+          label="Project Version"
+          value={project_version}
+          onChange={(e) => setProjectVersion(e.target.value)}
+          multiline
+          rows={2}
+          margin="normal"
+          required
         />
       </DialogContent>
       <DialogActions>

@@ -13,20 +13,38 @@ import {
 import { ProjectTable } from '../ProjectTable';
 import { AddProjectDialog } from '../AddCommentDialog/AddCommentDialog';
 import { Projects } from '../ProjectItemCards';
+import { iosApiRef } from '../../api';
+import { useApi,identityApiRef } from '@backstage/core-plugin-api';
+import useAsyncFn from 'react-use/esm/useAsyncFn';
 
 export const ExampleComponent = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [shouldRerender, setShouldRerender] = useState(false);
-
+  const iosApi = useApi(iosApiRef);
+  const identity = useApi(identityApiRef);
   // Read from localStorage
   const [currentView, setCurrentView] = useState(() => {
     const savedView = localStorage.getItem('viewType'); 
     return savedView ? savedView : 'list'; 
   });
 
+
+  const [userId, fetchUserId] = useAsyncFn(async () => {
+    return await (
+      await identity.getProfileInfo()
+    ).displayName;
+  });
+
+
+  useEffect(() => {
+    fetchUserId();
+  }, [fetchUserId]);
+  
   useEffect(() => {
     localStorage.setItem('viewType', currentView); 
   }, [currentView]); 
+
+
 
   const handleOpenDialog = () => {
     setDialogOpen(true);

@@ -39,6 +39,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const [project_life_cycle_status, setProjectLifeCycleStatus] = useState('');
   const [project_team_owner_name, setProjectTeamOwnerName] = useState('');
   const [project_team_owner_ref, setProjectTeamOwnerRef] = useState('');
+  const [project_version, setProjectVersion] = useState('');
 
   const project_rating = 0;
   const project_views = 0;
@@ -105,6 +106,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
         project_team_owner_ref,
         project_rating,
         project_views,
+        project_version,
       );
       handleCloseDialog();
     } catch (error) {
@@ -115,7 +117,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={handleCloseDialog} maxWidth="md" fullWidth>
       <DialogTitle>Add Project</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <TextField
@@ -212,6 +214,13 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           helperText={
             hasError(project_team_owner_ref) ? 'Not a valid URL' : ''
           }
+        />
+        <TextField
+          label="Version"
+          value={project_version}
+          onChange={(e) => setProjectVersion(e.target.value)}
+          margin="normal"
+          required
         />
       </DialogContent>
       <DialogActions>

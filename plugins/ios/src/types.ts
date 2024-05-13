@@ -10,6 +10,7 @@ export type Project = {
     project_team_owner_ref: string,
     project_rating: number,
     project_views: number,
+    project_version: string,
     project_start_date: Date, 
     project_update_date: Date 
 }
