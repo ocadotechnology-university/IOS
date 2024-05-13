@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
-  CardActions,
-  Button,
   Typography,
   CardMedia,
+  Button,
+  CardActions,
 } from '@material-ui/core';
 import { ItemCardGrid, ItemCardHeader } from '@backstage/core-components';
 import { useApi, alertApiRef, identityApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { makeStyles } from '@material-ui/core/styles';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
+import { ProjectOverview } from '../ProjectOverview';
 
 const useStyles = makeStyles({
   grid: {
@@ -22,8 +23,12 @@ const useStyles = makeStyles({
   card: {
     maxWidth: '800px',
     minWidth: '300px',
-    minHeight: '300px',
-    maxHeight: '400px',
+    minHeight: '200px',
+    maxHeight: '500px',
+    cursor: 'pointer', // Add cursor pointer to indicate clickable
+  },
+  description: {
+    wordWrap: 'break-word', // Allow long words to break and wrap onto the next line
   },
   noRecords: {
     textAlign: 'center',
@@ -34,32 +39,11 @@ const useStyles = makeStyles({
 export const Projects = () => {
   const classes = useStyles();
   const [projects, setProjects] = useState([]);
-  const [users, setUsers] = useState([]);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
-  const identity = useApi(identityApiRef);
-  const [userDisplayName, setUserDisplayName] = useState('');
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
-
-  const fetchUserDisplayName = async () => {
-    try {
-      const profile = await identity.getProfileInfo();
-      setUserDisplayName(profile.displayName || 'Unknown User');
-    } catch (error) {
-      console.error('Error fetching user display name:', error);
-      setUserDisplayName('Error Fetching User');
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const userData = await iosApi.getMembers();
-      setUsers(userData);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  };
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [openProjectOverview, setOpenProjectOverview] = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -72,28 +56,19 @@ export const Projects = () => {
 
   useEffect(() => {
     fetchProjects();
-    fetchUsers();
-    fetchUserDisplayName(); // Fetch the current user's display name
   }, []);
 
-  const handleDeleteProject = async (project_id) => {
-    try {
-      await iosApi.deleteProject(project_id);
-    } catch (error) {
-      console.error('Error deleting project:', error);
-    } finally {
+  useEffect(() => {
+    if (!openProjectOverview) {
       fetchProjects();
-      alertApi.post({
-        message: 'Project has been deleted.',
-        severity: 'success',
-        display: 'transient',
-      });
     }
-  };
+  }, [openProjectOverview]);
 
-  const handleUpdateProject = (project) => {
+  const handleViewProject = (project) => {
     setSelectedProject(project);
-    setOpenUpdateDialog(true);
+    setSelectedProjectId(project.project_id);
+    setOpenProjectOverview(true);
+
   };
 
   return (
@@ -101,73 +76,43 @@ export const Projects = () => {
       {projects.length > 0 ? (
         <ItemCardGrid className={classes.grid}>
           {projects.map((project) => (
-            <Card key={project.project_title} className={classes.card}>
-              <CardMedia>
-                <ItemCardHeader title={project.project_title} subtitle={project.project_manager_username} />
-              </CardMedia>
-              <CardContent>
-                <Typography variant="body2">{project.project_description}</Typography>
-              </CardContent>
-              <CardContent>
-                <Typography variant="body2">{project.project_team_owner_name}</Typography>
-              </CardContent>
-              <CardActions>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleUpdateProject(project)}
-                >
-                  Update
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => handleDeleteProject(project.project_id)}
-                >
-                  Delete
-                </Button>
-              </CardActions>
-            </Card>
+            <div
+              key={project.project_title}
+              className={classes.card}
+              onClick={() => handleViewProject(project)}
+            >
+              <Card>
+                <CardMedia>
+                  <ItemCardHeader
+                    title={project.project_title}
+                    subtitle={project.project_manager_username}
+                  />
+                </CardMedia>
+                <CardContent>
+                  <Typography variant="body2" className={classes.description}>
+                    {project.project_description}
+                  </Typography>
+                </CardContent>
+                <CardContent>
+                  <Typography variant="body2">
+                    {project.project_team_owner_name}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </ItemCardGrid>
       ) : (
         <div className={classes.noRecords}>
           <Typography variant="body2">No records to display</Typography>
-          <Typography variant="body2">
-            Logged in as: {userDisplayName}
-          </Typography>
         </div>
       )}
 
-      <UpdateProjectDialog
-        open={openUpdateDialog}
+      <ProjectOverview
+        open={openProjectOverview}
+        handleCloseDialog={() => setOpenProjectOverview(false)}
         project={selectedProject}
-        onClose={() => setOpenUpdateDialog(false)}
-        onSubmit={async (updatedData) => {
-          setOpenUpdateDialog(false);
-          try {
-            await iosApi.updateProject(
-              selectedProject.project_id,
-              updatedData.project_title,
-              updatedData.project_description,
-              updatedData.project_manager_username,
-              updatedData.project_manager_ref,
-              updatedData.project_docs_ref,
-              updatedData.project_life_cycle_status,
-              updatedData.project_team_owner_name,
-              updatedData.project_team_owner_ref,
-            );
-          } catch (error) {
-            console.error('Error updating project:', error);
-          } finally {
-            alertApi.post({
-              message: 'Project has been updated.',
-              severity: 'success',
-              display: 'transient',
-            });
-            fetchProjects();
-          }
-        }}
+        project_id={selectedProjectId}
       />
     </>
   );
