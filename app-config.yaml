@@ -67,14 +67,14 @@ techdocs:
   publisher:
     type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
 
-auth:
-  # see https://backstage.io/docs/auth/ to learn about auth providers
-  enviroment: development
-  providers:
-    github:
-      development:
-        clientId: Ov23li9kqNUpA5Ho6fHr
-        clientSecret: 95e5074800431515ced8911aff362c7f4c8b32a7
+#auth:
+#  # see https://backstage.io/docs/auth/ to learn about auth providers
+#  enviroment: development
+#  providers:
+#    github:
+#      development:
+#        clientId: Ov23li9kqNUpA5Ho6fHr
+#        clientSecret: 95e5074800431515ced8911aff362c7f4c8b32a7
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options

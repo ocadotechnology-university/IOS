@@ -15,6 +15,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
 import { iosApiRef } from '../../api';
+
 const useStyles = makeStyles({
   dialogContent: {
     display: 'flex',
@@ -38,10 +39,10 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const [project_life_cycle_status, setProjectLifeCycleStatus] = useState('');
   const [project_team_owner_name, setProjectTeamOwnerName] = useState('');
   const [project_team_owner_ref, setProjectTeamOwnerRef] = useState('');
+  const [project_version, setProjectVersion] = useState('');
 
   const project_rating = 0;
   const project_views = 0;
-  const project_start_date = new Date();
 
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -64,13 +65,40 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
     fetchUsersAndGroups();
   }, [catalogApi]);
 
+  const isValidUrl = (url) => {
+    const urlPattern = /^https?:\/\/.*$/;
+    return urlPattern.test(url);
+  };
+
+  const hasError = (url) => {
+    return url && !isValidUrl(url);
+  };
+
+  const isFormValid = () => {
+    return (
+      project_title &&
+      project_description &&
+      project_manager_username &&
+      project_team_owner_name &&
+      project_life_cycle_status &&
+      (!project_manager_ref || isValidUrl(project_manager_ref)) &&
+      (!project_docs_ref || isValidUrl(project_docs_ref)) &&
+      isValidUrl(project_team_owner_ref)
+    );
+  };
 
   const handleSubmit = async () => {
+    if (!isFormValid()) {
+      console.error('Invalid form data');
+      
+      return;
+    }
+
     try {
       await iosApi.insertProject(
-        project_title, 
-        project_description, 
-        project_manager_username, 
+        project_title,
+        project_description,
+        project_manager_username,
         project_manager_ref,
         project_docs_ref,
         project_life_cycle_status,
@@ -78,9 +106,9 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
         project_team_owner_ref,
         project_rating,
         project_views,
-        project_start_date,
+        project_version,
       );
-      handleCloseDialog(); 
+      handleCloseDialog();
     } catch (error) {
       console.error('Error adding project:', error);
     } finally {
@@ -89,7 +117,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={handleCloseDialog} maxWidth="md" fullWidth>
       <DialogTitle>Add Project</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <TextField
@@ -106,18 +134,16 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={4}
           margin="normal"
+          required
         />
-        <FormControl fullWidth margin="normal">
+        <FormControl fullWidth margin="normal" required>
           <InputLabel>Project Manager</InputLabel>
           <Select
             value={project_manager_username}
             onChange={(e) => setProjectManagerUsername(e.target.value)}
           >
             {users.map((user) => (
-              <MenuItem
-                key={user.metadata.uid}
-                value={user.metadata.name}
-              >
+              <MenuItem key={user.metadata.uid} value={user.metadata.name}>
                 {user.metadata.name}
               </MenuItem>
             ))}
@@ -130,8 +156,11 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
+          error={hasError(project_manager_ref)}
+          helperText={
+            hasError(project_manager_ref) ? 'Not a valid URL' : ''
+          }
         />
-        
         <TextField
           label="Docs Link"
           value={project_docs_ref}
@@ -139,8 +168,9 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
+          error={hasError(project_docs_ref)}
+          helperText={hasError(project_docs_ref) ? 'Not a valid URL' : ''}
         />
-
         <TextField
           label="Life Cycle"
           value={project_life_cycle_status}
@@ -148,26 +178,21 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
+          required
         />
-
-        <FormControl fullWidth margin="normal">
+        <FormControl fullWidth margin="normal" required>
           <InputLabel>Team Owner</InputLabel>
           <Select
             value={project_team_owner_name}
             onChange={(e) => setProjectTeamOwnerName(e.target.value)}
           >
             {groups.map((group) => (
-              <MenuItem
-                key={group.metadata.uid}
-                value={group.metadata.name}
-              >
+              <MenuItem key={group.metadata.uid} value={group.metadata.name}>
                 {group.metadata.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-
-
         <TextField
           label="Team"
           value={project_team_owner_name}
@@ -175,8 +200,8 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
+          required
         />
-
         <TextField
           label="Team Link"
           value={project_team_owner_ref}
@@ -184,13 +209,27 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
+          required
+          error={hasError(project_team_owner_ref)}
+          helperText={
+            hasError(project_team_owner_ref) ? 'Not a valid URL' : ''
+          }
         />
-
-        
+        <TextField
+          label="Version"
+          value={project_version}
+          onChange={(e) => setProjectVersion(e.target.value)}
+          margin="normal"
+          required
+        />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleSubmit} color="primary">
-          Submit
+        <Button
+          onClick={handleSubmit}
+          color="primary"
+          disabled={!isFormValid()}
+        >
+          Add
         </Button>
         <Button onClick={handleCloseDialog} color="primary">
           Cancel

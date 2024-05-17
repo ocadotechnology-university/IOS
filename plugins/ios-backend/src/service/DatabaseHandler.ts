@@ -38,28 +38,61 @@ export class DatabaseHandler {
     project_team_owner_ref: string,
     project_rating: number,
     project_views: number,
-    project_start_date: Date, 
+    project_version: string,
+): Promise<void> {
+    try {
+        const date = new Date();
+        const preciseStartDate = date.toISOString().slice(0, 19).replace('T', ' ');
+        
+        await this.client('ios-table')
+            .insert({ 
+                project_title, 
+                project_description, 
+                project_manager_username, 
+                project_manager_ref,
+                project_docs_ref,
+                project_life_cycle_status,
+                project_team_owner_name,
+                project_team_owner_ref,
+                project_rating,
+                project_views,
+                project_version,
+                project_start_date: preciseStartDate, 
+                project_update_date: preciseStartDate,
+            }); 
+        console.log(`Project inserted successfully`);
+    } catch (error) {
+        console.error('Error inserting Project:', error);
+        throw error;
+    }
+}
 
-      ): Promise<void> {
+  async updateProjectViews(
+    project_id: number,
+    views: number,
+  ): Promise<void> {
     try {
       await this.client('ios-table')
-        .insert({ 
-          project_title, 
-          project_description, 
-          project_manager_username, 
-          project_manager_ref,
-          project_docs_ref,
-          project_life_cycle_status,
-          project_team_owner_name,
-          project_team_owner_ref,
-          project_rating,
-          project_views,
-          project_start_date,
-
-        }); 
-      console.log(`Project inserted succesfully`);
+        .where({ project_id }) 
+        .update({ project_views: views });
+      console.log(`Project views updated successfully.`);
     } catch (error) {
-      console.error('Error inserting Project:', error);
+      console.error('Error updating project views:', error);
+      throw error;
+    }
+  }
+
+  async updateProjectRating(
+    project_id: number,
+    rating: number,
+  ): Promise<void> {
+    try {
+      await this.client('ios-table')
+        .where({ project_id }) 
+        .update({project_rating: rating}); 
+      console.log(`Project rating updated successfully.`);
+    } catch (error) {
+      console.error('Error updating project rating:', error);
       throw error;
     }
   }
@@ -75,7 +108,8 @@ export class DatabaseHandler {
       project_life_cycle_status: string,
       project_team_owner_name: string,
       project_team_owner_ref: string,
-
+      project_version: string,
+      project_update_date: Date
     }>
   ): Promise<void> {
     try {
@@ -88,7 +122,6 @@ export class DatabaseHandler {
       throw error;
     }
   }
-
   async deleteProject(project_id: number ): Promise<void> {
     try {
       await this.client('ios-table').where({ project_id }).del();
@@ -111,7 +144,9 @@ export class DatabaseHandler {
     project_team_owner_ref: string,
     project_rating: number,
     project_views: number,
-    project_start_date: Date, 
+    project_version: string,
+    project_start_date: Date,
+    project_update_date: Date 
   }[]> {
     try {
       const projects = await this.client('ios-table').select(
@@ -126,7 +161,9 @@ export class DatabaseHandler {
         'project_team_owner_ref',
         'project_rating',
         'project_views',
+        'project_version',
         'project_start_date',
+        'project_update_date',
       );
       return projects;
     } catch (error) {
@@ -134,27 +171,119 @@ export class DatabaseHandler {
       throw error;
     }
   }
+
+  async getProjectVersion(ProjectId: number): Promise<{ 
+    project_version: string,
+  }[]> {
+    try {
+      const project_version = await this.client('ios-table').select(
+        'project_version',
+      ).where('project_id', ProjectId);
+      return project_version;
+    } catch (error) {
+      console.error('Error fetching project version:', error);
+      throw error;
+    }
+  }
   
   async addUser(
-    id: number,
-    userName: string,
-    userAvatar?: string,
-    userEntityRef?: string
+    username: string,
+    user_avatar?: string,
+    userEntityRef?: string,
+
   ): Promise<void> {
     await this.client.insert({
-      user_id: id,
-      username: userName,
-      user_avatar: userAvatar,
+      username: username,
+      user_avatar: user_avatar,
       entity_ref: userEntityRef
     }).into('ios-table-users');
   }
 
-  async getUsersById(userId: number): Promise<Array<{ username: string; user_avatar: string; entity_ref: string }>> {
+  async updateUserProjects(
+    user_id: number,
+    user_projects_ids: number[]
+  ): Promise<void> {
+    try {
+      const projectsArray = "{" + user_projects_ids.join(",") + "}";
+
+        // Execute raw SQL query to update the user_projects_ids
+        await this.client.raw(`
+            UPDATE "ios-table-users"
+            SET "user_projects_ids" = ?
+            WHERE "user_id" = ?
+        `, [projectsArray, user_id]);
+        
+      console.log(`User projects updated successfully.`);
+    } catch (error) {
+      console.error('Error updating user projects:', error);
+      throw error;
+    }
+  }
+
+  async getUsersByProjectID(projectId: number): Promise<Array<{ user_id: number; username: string; user_avatar: string; entity_ref: string }>> {
     const result = await this.client
-      .select('username', 'user_avatar', 'entity_ref')
-      .from('ios-table-users')
-      .where('user_id', userId);
-    return result; 
+        .select('user_id', 'username', 'user_avatar', 'entity_ref')
+        .from('ios-table-users')
+        .whereRaw('? = ANY(user_projects_ids)', [projectId]);
+    return result;
+  }
+
+  async insertComment(
+    project_id_ref: number,
+    user_id_ref: number,
+    comment_text: string,
+    comment_version: string,
+
+      ): Promise<void> {
+    try {
+      const date = new Date();
+      const comment_date = date.toISOString().slice(0, 19).replace('T', ' ');
+      await this.client('ios-table-comments')
+        .insert({ 
+          project_id_ref,
+          user_id_ref,
+          comment_text,
+          comment_date,
+          comment_version,
+        }); 
+      console.log(`Comment inserted succesfully`);
+    } catch (error) {
+      console.error('Error inserting comment:', error);
+      throw error;
+    }
+  }
+
+  async getCommentsByProjectID(projectId: number): Promise<{ 
+    comment_id: number,
+    user_id_ref: number,
+    comment_text: string,
+    comment_date: Date,
+    comment_version: string,
+  }[]> {
+    try {
+      const comments = await this.client('ios-table-comments').select(
+        'comment_id',
+        'user_id_ref',
+        'comment_text',
+        'comment_date',
+        'comment_version',
+      )
+      .where('project_id_ref', projectId);
+      return comments;
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      throw error;
+    }
+  }
+
+  async deleteComment(comment_id: number): Promise<void> {
+    try {
+      await this.client('ios-table-comments').where({ comment_id }).del();
+      console.log(`Comment deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting value:', error);
+      throw error;
+    }
   }
 
 

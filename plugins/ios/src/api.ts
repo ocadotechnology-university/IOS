@@ -16,7 +16,9 @@ export interface IosApi {
     project_life_cycle_status: string,
     project_team_owner_name: string,
     project_team_owner_ref: string,
-    project_start_date: Date
+    project_views: number,
+    project_rating: number,
+    project_version: string,
     ) : Promise<void>;
 
   deleteProject(project_id: number): Promise<void>;
@@ -30,7 +32,8 @@ export interface IosApi {
     project_docs_ref: string,
     project_life_cycle_status: string,
     project_team_owner_name: string,
-    project_team_owner_ref: string
+    project_team_owner_ref: string,
+    project_version: string,
     ) : Promise<void>;
 
   getProjects(
@@ -38,7 +41,6 @@ export interface IosApi {
   ): Promise <Project[]>;
   getMembers(project_id: number): Promise <Member[]>
   insertMember( 
-    project_id: number,
     username: string
   ): Promise <void>;
 }
@@ -69,7 +71,7 @@ export class IosClient implements IosApi {
     project_team_owner_ref: string,
     project_rating: number,
     project_views: number,
-    project_start_date: Date,
+    project_version: string,
   ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/projects/`;
@@ -85,7 +87,7 @@ export class IosClient implements IosApi {
       project_team_owner_ref,
       project_rating,
       project_views,
-      project_start_date
+      project_version,
     };
   
     const response = await this.fetchApi.fetch(url, {
@@ -139,6 +141,7 @@ export class IosClient implements IosApi {
     project_life_cycle_status?: string,
     project_team_owner_name?: string,
     project_team_owner_ref?: string,
+    project_version?: string,
     ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/projects/${project_id}`;
@@ -152,6 +155,7 @@ export class IosClient implements IosApi {
       project_life_cycle_status,
       project_team_owner_name,
       project_team_owner_ref,
+      project_version,
     };
     
     const response = await this.fetchApi.fetch(url, {
@@ -174,19 +178,19 @@ export class IosClient implements IosApi {
   }
 
   async insertMember(
-    project_id: number,
     username: string,
   ) : Promise <void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/projects/${project_id}/members/${username}`;
+    const url = `${baseUrl}/ios_members`;
     const { user_avatar } = await this.identityApi.getProfileInfo();
+    const payload = { username, user_avatar}
 
     const response = await this.fetchApi.fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(user_avatar) 
+      body: JSON.stringify(payload) 
     });
   
     if (!response.ok) {

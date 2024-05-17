@@ -1,6 +1,7 @@
 import { 
   createPlugin, 
   createRoutableExtension,
+  createComponentExtension,
   createApiFactory,
   identityApiRef,
   discoveryApiRef,
@@ -35,5 +36,17 @@ export const IosPage = iosPlugin.provide(
     component: () =>
       import('./components/HomePage').then(m => m.ExampleComponent),
     mountPoint: rootRouteRef,
+  }),
+);
+
+export const EntityIosPluginCard = iosPlugin.provide(
+  createComponentExtension({
+      name: 'EntityMyAwesomePluginCard',
+      component: {
+          lazy: () => 
+              import('./components/EntityOverviewCard').then(
+                  m => m.EntityOverviewCard,
+              ),
+      },
   }),
 );

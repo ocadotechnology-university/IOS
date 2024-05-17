@@ -41,7 +41,8 @@ export async function createRouter(
       project_team_owner_ref,
       project_rating,
       project_views,
-      project_start_date,
+      project_version,
+
     } = request.body;
     try {
       await dbHandler.insertProject(
@@ -55,7 +56,7 @@ export async function createRouter(
         project_team_owner_ref,
         project_rating,
         project_views,
-        project_start_date,
+        project_version,
       );
       response.status(200).send('Project inserted successfully.');
     } catch (error) {
@@ -64,10 +65,12 @@ export async function createRouter(
     }
   });
   
+  
 
   router.put('/projects/:project_id', async (request, response) => {
     const project_id_str = request.params.project_id;
     const project_id = parseInt(project_id_str, 10); 
+
     const {
       project_title, 
       project_description, 
@@ -77,8 +80,12 @@ export async function createRouter(
       project_life_cycle_status,
       project_team_owner_name,
       project_team_owner_ref,
+      project_version,
     } = request.body;
   
+    const date = new Date();
+    const project_update_date = date.toISOString().slice(0, 19).replace('T', ' ');
+
     const updates: { 
       project_title?: string, 
       project_description?: string, 
@@ -88,6 +95,8 @@ export async function createRouter(
       project_life_cycle_status?: string,
       project_team_owner_name?: string,
       project_team_owner_ref?: string,
+      project_version?: string,
+      project_update_date?: string 
     } = {};
     
     if (project_title){
@@ -122,10 +131,20 @@ export async function createRouter(
       updates.project_team_owner_ref = project_team_owner_ref;
     }
 
+    if (project_version){
+      updates.project_version = project_version;
+    }
+
+
+    updates.project_update_date = project_update_date;
+
     try {
+    
       await dbHandler.updateProject(project_id, updates);
+     
       response.status(200).send('Project updated successfully.');
     } catch (error) {
+     
       console.error('Error updating project:', error);
       response.status(500).send('Internal server error.');
     }
@@ -155,31 +174,134 @@ export async function createRouter(
     }
   });
   
-  router.put('/projects/:project_id/members/:userId', async (request, response) => {
-    
-    const projet_id_str = request.params.project_id;
-    const project_id = parseInt(projet_id_str, 10); 
-    const userId = request.params.userId;
-    const user = await identity.getIdentity({ request: request });
-
-    try {
-      await dbHandler.addUser(project_id, userId, request.body?.user_avatar, user?.identity.userEntityRef);
-      response.status(200).send('User inserted succesfully.');
-    } catch (error) {
-      console.error('Error inserting user: ', error);
-      response.status(500).send('Internal server error');
-    }
-  });
-
-  router.get('/projects/:project_id/members', async (request, response) => {
+  router.get('/ios_members/:project_id', async (request, response) => {
     const projet_id_str = request.params.project_id;
     const project_id = parseInt(projet_id_str, 10);
     try{ 
-      const users = await dbHandler.getUsersById(project_id);
+      const users = await dbHandler.getUsersByProjectID(project_id);
       response.status(200).json(users);
     } catch (error) {
       console.error('Error getting users: ', error);
       response.status(500).send('Internal server error');
+    }
+  });
+
+  router.post('/ios_members', async (request, response) => {
+    const { 
+      username,
+      user_avatar,
+    } = request.body;
+    const user = await identity.getIdentity({ request: request });
+    const userEntityRef = user?.identity.userEntityRef
+    try {
+      await dbHandler.addUser(
+        username,
+        user_avatar,
+        userEntityRef,
+      );
+      response.status(200).send('User created successfully.');
+    } catch (error) {
+      console.error('Error creating user:', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.put('/ios_members/:user_id', async (request, response) => {
+    const user_id_str = request.params.user_id;
+    const user_id = parseInt(user_id_str, 10); 
+    const {
+      user_projects_ids,
+    } = request.body
+
+    try {
+      await dbHandler.updateUserProjects(user_id, user_projects_ids);
+      response.status(200).send('User projects updated successfully.');
+    } catch (error) {
+      console.error('Error updating user projects:', error);
+      response.status(500).send('Internal server error.');
+    }
+  });
+
+  router.post('/projects/:project_id/comments', async (request, response) => {
+    const project_id_ref_str = request.params.project_id;
+    const project_id_ref = parseInt(project_id_ref_str, 10);
+    const { 
+      user_id_ref,
+      comment_text,
+    } = request.body;
+    
+
+    try {
+      const projectVersions = await dbHandler.getProjectVersion(project_id_ref);
+      const comment_version = projectVersions.length > 0 ? projectVersions[0].project_version : 'default-version';
+
+
+      await dbHandler.insertComment(
+        project_id_ref,
+        user_id_ref,
+        comment_text,
+        comment_version,
+      );
+      response.status(200).send('Comment created successfully.');
+    } catch (error) {
+      console.error('Error creating comment:', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.get('/projects/:project_id', async (request, response) => {
+    const projet_id_str = request.params.project_id;
+    const project_id = parseInt(projet_id_str, 10);
+    try{ 
+      const comments = await dbHandler.getCommentsByProjectID(project_id);
+      response.status(200).json(comments);
+    } catch (error) {
+      console.error('Error getting comments: ', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.delete('/projects/:project_id/comments/:comment_id', async (request, response) => {
+    const comment_id_str = request.params.comment_id;
+    const comment_id = parseInt(comment_id_str, 10); 
+
+    try {
+      await dbHandler.deleteComment(comment_id);
+      response.status(200).send(`Value deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting value:', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.put('/projects/:project_id', async (request, response) => {
+    const project_id_str = request.params.project_id;
+    const project_id = parseInt(project_id_str, 10); 
+    const {
+      project_views
+    } = request.body
+    try {
+      await dbHandler.updateProjectViews(project_id, project_views);
+      response.status(200).send('Project views updated successfully.');
+    } catch (error) {
+      console.error('Error updating project: views', error);
+      response.status(500).send('Internal server error.');
+    }
+  });
+
+  router.put('/projects/:project_id', async (request, response) => {
+    const project_id_str = request.params.project_id;
+    const project_id = parseInt(project_id_str, 10); 
+    const {
+      project_rating,
+    } = request.body
+    
+    try {
+      await dbHandler.updateProjectRating(project_id, project_rating);
+      response.status(200).send('Project rating updated successfully.');
+    } catch (error) {
+      console.error('Error updating project rating:', error);
+      response.status(500).send('Internal server error.');
     }
   });
 

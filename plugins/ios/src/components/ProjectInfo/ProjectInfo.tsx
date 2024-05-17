@@ -1,36 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, TextField, IconButton } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
+import LinkIcon from '@material-ui/icons/Link';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { ProjectDeleteDialog } from '../ProjectDeleteDialog'; 
+import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
+import { UpdateProjectDialog } from '../UpdateProjectDialog';
+import { useApi } from '@backstage/core-plugin-api';
+import { iosApiRef } from '../../api';
+import { alertApiRef } from '@backstage/core-plugin-api';
+import { TimeSinceUpdate } from '../DateTime';
+import { TimeToDate } from "../DateTime"
+import { parseEntityRef } from '@backstage/catalog-model';
 
 type Props = {
   project: any;
-  onDeleteClick: () => void; 
+  onDeleteClick: () => void;
+  fetchProjects: () => void;
 };
 
-export const ProjectInfo = ({ project, onDeleteClick }: Props) => {
-  const [isEditable, setIsEditable] = useState(false); 
+export const ProjectInfo = ({ project, onDeleteClick, fetchProjects }: Props) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(project);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [linkedEntity, setLinkedEntity] = useState(null);
+  const iosApi = useApi(iosApiRef);
+  const alertApi = useApi(alertApiRef);
 
   const handleEditClick = () => {
-    setIsEditable(true);
+    setOpenUpdateDialog(true);
   };
 
   const handleDeleteClick = () => {
     setOpenDeleteDialog(true);
-    onDeleteClick(); 
+    onDeleteClick();
   };
 
   const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false); 
+    setOpenDeleteDialog(false);
   };
+
+  useEffect(() => {
+    if (selectedProject.project_entity_ref) {
+      // Parse the entity reference using the parseEntityRef function
+      const parsedEntity = parseEntityRef(selectedProject.project_entity_ref);
+      // Update state with the parsed entity data
+      setLinkedEntity(parsedEntity);
+    }
+  }, [selectedProject.project_entity_ref]);
 
   return (
     <Grid container spacing={2}>
       <Grid container justifyContent='flex-end'>
         <Grid item xs={11}>
-          <h1>Project info</h1>
+          <h2>Project: {selectedProject.project_title}</h2>
         </Grid>
 
         <Grid item>
@@ -43,85 +65,160 @@ export const ProjectInfo = ({ project, onDeleteClick }: Props) => {
             <DeleteIcon />
           </IconButton>
         </Grid>
+        <Grid item >
+          <IconButton size='medium'>
+            <LinkIcon />
+          </IconButton>
+        </Grid>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={2} md={12}>
+        <h4 style={{ color: 'rgba(209, 205, 205, 1)' }}>{selectedProject.project_description}</h4>
+      </Grid>
+      <Grid item xs={12} md={6}>
         <TextField
-          label="Project Title"
-          value={project.project_title}
+          label="Last Updated"
+          value={TimeSinceUpdate({ updateDate: selectedProject.project_update_date })}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={6}>
+        <TextField
+          label="Project Initialization Date:"
+          value={TimeToDate({startDate :selectedProject.project_start_date})}
+          margin="normal"
+          fullWidth
+          disabled
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
         <TextField
           label="Project Description"
-          value={project.project_description}
+          value={selectedProject.project_description}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={6}>
         <TextField
           label="Project Life Cycle Status"
-          value={project.project_life_cycle_status}
+          value={selectedProject.project_life_cycle_status}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={6}>
         <TextField
           label="Project Manager"
-          value={project.project_manager_username}
+          value={selectedProject.project_manager_username}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={6}>
         <TextField
-          label="Project Manager reference"
-          value={project.project_manager_ref}
+          label="Project Manager Reference"
+          value={selectedProject.project_manager_ref}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={6}>
         <TextField
           label="Project Team Owner"
-          value={project.project_team_owner_name}
+          value={selectedProject.project_team_owner_name}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={6}>
         <TextField
-          label="Team Owner reference"
-          value={project.project_team_owner_ref}
+          label="Team Owner Reference"
+          value={selectedProject.project_team_owner_ref}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={6}>
         <TextField
-          label="Project Docs reference"
-          value={project.project_docs_ref}
+          label="Project Docs Reference"
+          value={selectedProject.project_docs_ref}
           margin="normal"
           fullWidth
-          disabled={!isEditable}
+          disabled
         />
       </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          label="Project Version"
+          value={selectedProject.project_version}
+          margin="normal"
+          fullWidth
+          disabled
+        />
+      </Grid>
+      
       {/* Conditionally render the delete dialog */}
       {openDeleteDialog && (
         <ProjectDeleteDialog
           project_id={project.project_id}
           onClose={handleCloseDeleteDialog}
         />
+      )}
+
+      {/* Conditionally render the update dialog */}
+      <UpdateProjectDialog
+        open={openUpdateDialog}
+        onClose={() => setOpenUpdateDialog(false)}
+        project={selectedProject}
+        onSubmit={async (updatedData) => {
+          setOpenUpdateDialog(false);
+          try {
+            setSelectedProject({
+              ...selectedProject,
+              ...updatedData,
+            });
+            await iosApi.updateProject(
+              selectedProject.project_id,
+              updatedData.project_title,
+              updatedData.project_description,
+              updatedData.project_manager_username,
+              updatedData.project_manager_ref,
+              updatedData.project_docs_ref,
+              updatedData.project_life_cycle_status,
+              updatedData.project_team_owner_name,
+              updatedData.project_team_owner_ref,
+              updatedData.project_version,
+            );
+            fetchProjects();
+          } catch (error) {
+            console.error('Error updating project:', error);
+          } finally {
+            alertApi.post({
+              message: 'Project has been updated.',
+              severity: 'info',
+              display: 'transient'
+            });
+          }
+        }}
+      />
+
+      {/* Render linked entity information */}
+      {linkedEntity && (
+        <Grid item xs={12}>
+          <h3>Linked Entity Information</h3>
+          <p>Name: {linkedEntity.name}</p>
+          <p>Type: {linkedEntity.type}</p>
+          {/* Add more fields as needed */}
+        </Grid>
       )}
     </Grid>
   );

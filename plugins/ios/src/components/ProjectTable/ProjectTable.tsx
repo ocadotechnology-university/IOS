@@ -4,7 +4,7 @@ import { Button } from '@material-ui/core';
 import { useApi, alertApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { ProjectOverview } from '../ProjectOverview';
-import { UpdateProjectDialog } from '../UpdateProjectDialog'; 
+
 
 export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
@@ -14,7 +14,7 @@ export const ProjectTable = () => {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   const [openProjectOverview, setOpenProjectOverview] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false); 
+
 
   const fetchProjects = async () => {
     try {
@@ -35,14 +35,9 @@ export const ProjectTable = () => {
     }
   }, [openProjectOverview]);
 
-  const handleUpdateProject = (project) => {
-    setSelectedProject(project);
-    setOpenUpdateDialog(true);
-  };
-
   const handleViewProject = (project, project_id) => {
     setSelectedProject(project);
-    setSelectedProjectId(project_id); // Set selected project_id
+    setSelectedProjectId(project_id); 
     setOpenProjectOverview(true);
   };
 
@@ -63,14 +58,6 @@ export const ProjectTable = () => {
           >
             View Project
           </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleUpdateProject(rowData)}
-          >
-            Update
-          </Button>
-
         </>
       ),
     },
@@ -82,36 +69,6 @@ export const ProjectTable = () => {
         title="Projects"
         columns={columns}
         data={projects}
-      />
-      <UpdateProjectDialog
-        open={openUpdateDialog}
-        project={selectedProject}
-        onClose={() => setOpenUpdateDialog(false)}
-        onSubmit={async (updatedData) => {
-          setOpenUpdateDialog(false);
-          try {
-            await iosApi.updateProject(
-              selectedProject.project_id,
-              updatedData.project_title,
-              updatedData.project_description,
-              updatedData.project_manager_username,
-              updatedData.project_manager_ref,
-              updatedData.project_docs_ref,
-              updatedData.project_life_cycle_status,
-              updatedData.project_team_owner_name,
-              updatedData.project_team_owner_ref
-            );
-          } catch (error) {
-            console.error('Error updating project:', error);
-          } finally {
-            alertApi.post({
-              message: 'Project has been updated. ',
-              severity: 'success',
-              display: 'transient'
-            });
-            fetchProjects();
-          }
-        }}
       />
       <ProjectOverview
         open={openProjectOverview}
