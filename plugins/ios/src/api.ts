@@ -8,7 +8,8 @@ export const iosApiRef = createApiRef<IosApi>({
 
 export interface IosApi {
   insertProject(
-    project_title: string, 
+    project_title: string,
+    enitity_ref: string, 
     project_description: string, 
     project_manager_username: string,
     project_manager_ref: string,
@@ -25,6 +26,7 @@ export interface IosApi {
 
   updateProject(
     project_id: number,
+    enitity_ref: string,
     project_title: string, 
     project_description: string, 
     project_manager_username: string, 
@@ -62,6 +64,7 @@ export class IosClient implements IosApi {
 
   async insertProject(
     project_title: string, 
+    enitity_ref: string,
     project_description: string, 
     project_manager_username: string, 
     project_manager_ref: string,
@@ -78,6 +81,7 @@ export class IosClient implements IosApi {
   
     const payload = {
       project_title, 
+      enitity_ref,
       project_description, 
       project_manager_username, 
       project_manager_ref,
@@ -133,6 +137,7 @@ export class IosClient implements IosApi {
 
   async updateProject(
     project_id: number,
+    enitity_ref?: string,
     project_title?: string, 
     project_description?: string, 
     project_manager_username?: string,
@@ -148,6 +153,7 @@ export class IosClient implements IosApi {
     
     const payload = {
       project_title, 
+      enitity_ref,
       project_description, 
       project_manager_username,
       project_manager_ref,

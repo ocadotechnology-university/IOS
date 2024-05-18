@@ -28,7 +28,8 @@ export class DatabaseHandler {
   }
 
   async insertProject(
-    project_title: string, 
+    project_title: string,
+    entity_ref: string, 
     project_description: string, 
     project_manager_username: string,
     project_manager_ref: string,
@@ -47,6 +48,7 @@ export class DatabaseHandler {
         await this.client('ios-table')
             .insert({ 
                 project_title, 
+                entity_ref,
                 project_description, 
                 project_manager_username, 
                 project_manager_ref,
@@ -101,6 +103,7 @@ export class DatabaseHandler {
     project_id: number,
     updates: Partial<{ 
       project_title: string, 
+      entity_ref: string,
       project_description: string, 
       project_manager_username: string, 
       project_manager_ref: string,
@@ -134,6 +137,7 @@ export class DatabaseHandler {
 
   async getProjects(): Promise<{ 
     project_id: number,
+    entity_ref: string,
     project_title: string, 
     project_description: string, 
     project_manager_username: string,
@@ -151,6 +155,7 @@ export class DatabaseHandler {
     try {
       const projects = await this.client('ios-table').select(
         'project_id',
+        'entity_ref',
         'project_title', 
         'project_description', 
         'project_manager_username', 

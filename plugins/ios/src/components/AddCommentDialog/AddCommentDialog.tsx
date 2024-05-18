@@ -15,6 +15,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
 import { iosApiRef } from '../../api';
+import { ProjectSelector } from '../ProjectSelector';
+import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
 
 const useStyles = makeStyles({
   dialogContent: {
@@ -32,6 +34,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const classes = useStyles();
 
   const [project_title, setProjectTitle] = useState('');
+  const [entity_ref, setEntityRef] = useState('');
   const [project_description, setProjectDescription] = useState('');
   const [project_manager_username, setProjectManagerUsername] = useState('');
   const [project_manager_ref, setProjectManagerRef] = useState('');
@@ -46,6 +49,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
 
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [catalogEntities, setCatalogEntities] = useState([]); // New state for catalog entities
   const catalogApi = useApi(catalogApiRef);
   const iosApi = useApi(iosApiRef);
 
@@ -62,8 +66,21 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       setGroups(groupEntities.items);
     };
 
+    const fetchCatalogEntities = async () => {
+      const entities = await catalogApi.getEntities({
+        filter:  { kind: 'component'}
+      });
+      setCatalogEntities(entities.items);
+    };
+
     fetchUsersAndGroups();
+    fetchCatalogEntities();
   }, [catalogApi]);
+
+  
+  useEffect(() => {
+    console.log('Selected entity reference:', entity_ref);
+  }, [entity_ref]);
 
   const isValidUrl = (url) => {
     const urlPattern = /^https?:\/\/.*$/;
@@ -90,30 +107,34 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const handleSubmit = async () => {
     if (!isFormValid()) {
       console.error('Invalid form data');
-      
       return;
     }
 
     try {
-      await iosApi.insertProject(
-        project_title,
-        project_description,
-        project_manager_username,
-        project_manager_ref,
-        project_docs_ref,
-        project_life_cycle_status,
-        project_team_owner_name,
-        project_team_owner_ref,
-        project_rating,
-        project_views,
-        project_version,
-      );
+      await iosApi.insertProject({
+        title: project_title,
+        entityRef: entity_ref,
+        description: project_description,
+        managerUsername: project_manager_username,
+        managerRef: project_manager_ref,
+        docsRef: project_docs_ref,
+        lifeCycleStatus: project_life_cycle_status,
+        teamOwnerName: project_team_owner_name,
+        teamOwnerRef: project_team_owner_ref,
+        rating: project_rating,
+        views: project_views,
+        version: project_version,
+      });
       handleCloseDialog();
     } catch (error) {
       console.error('Error adding project:', error);
     } finally {
       handleCloseDialog();
     }
+  };
+
+  const handleEntityClick = (entity: Entity) => {
+    setEntityRef(stringifyEntityRef(entity));
   };
 
   return (
@@ -126,6 +147,13 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           onChange={(e) => setProjectTitle(e.target.value)}
           margin="normal"
           required
+        />
+        <ProjectSelector
+          catalogEntities={catalogEntities}
+          onChange={handleEntityClick}
+          disableClearable={true}
+          defaultValue={catalogEntities[0] || null}
+          label="Select Project Entity"
         />
         <TextField
           label="Description"
@@ -157,9 +185,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           rows={2}
           margin="normal"
           error={hasError(project_manager_ref)}
-          helperText={
-            hasError(project_manager_ref) ? 'Not a valid URL' : ''
-          }
+          helperText={hasError(project_manager_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
           label="Docs Link"
@@ -194,15 +220,6 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           </Select>
         </FormControl>
         <TextField
-          label="Team"
-          value={project_team_owner_name}
-          onChange={(e) => setProjectTeamOwnerName(e.target.value)}
-          multiline
-          rows={2}
-          margin="normal"
-          required
-        />
-        <TextField
           label="Team Link"
           value={project_team_owner_ref}
           onChange={(e) => setProjectTeamOwnerRef(e.target.value)}
@@ -211,9 +228,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           margin="normal"
           required
           error={hasError(project_team_owner_ref)}
-          helperText={
-            hasError(project_team_owner_ref) ? 'Not a valid URL' : ''
-          }
+          helperText={hasError(project_team_owner_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
           label="Version"

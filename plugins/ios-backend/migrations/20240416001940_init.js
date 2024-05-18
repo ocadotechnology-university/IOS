@@ -5,6 +5,7 @@
 exports.up = async function up(knex) {
     await knex.schema.createTable('ios-table', table => {
         table.increments('project_id').notNullable().unique().comment("Unique id of a project");
+        table.string('entity_ref').notNullable().comment("Entity reference on a component");
         table.string('project_title').notNullable().unique().comment("Unique title of a project");
         table.string('project_description').notNullable().comment("Description of a project");
         table.string('project_manager_ref').notNullable().comment("Reference to user that manages a project");
