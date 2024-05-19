@@ -1,6 +1,6 @@
 export type Project = {
     project_id: number,
-    backstage_plugin_ios: string,
+    entity_ref: string,
     project_title: string, 
     project_description: string, 
     project_manager_username: string,

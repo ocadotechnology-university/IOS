@@ -88,7 +88,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   };
 
   const hasError = (url) => {
-    return url && !isValidUrl(url);
+    return !!(url && !isValidUrl(url)); // Return boolean
   };
 
   const isFormValid = () => {
@@ -98,6 +98,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       project_manager_username &&
       project_team_owner_name &&
       project_life_cycle_status &&
+      entity_ref &&  // Ensure entity_ref is included in the validation
       (!project_manager_ref || isValidUrl(project_manager_ref)) &&
       (!project_docs_ref || isValidUrl(project_docs_ref)) &&
       isValidUrl(project_team_owner_ref)
@@ -110,21 +111,36 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       return;
     }
 
+    console.log('Form data:', {
+      project_title,
+      entity_ref,
+      project_description,
+      project_manager_username,
+      project_manager_ref,
+      project_docs_ref,
+      project_life_cycle_status,
+      project_team_owner_name,
+      project_team_owner_ref,
+      project_rating,
+      project_views,
+      project_version,
+    });
+
     try {
-      await iosApi.insertProject({
-        title: project_title,
-        entityRef: entity_ref,
-        description: project_description,
-        managerUsername: project_manager_username,
-        managerRef: project_manager_ref,
-        docsRef: project_docs_ref,
-        lifeCycleStatus: project_life_cycle_status,
-        teamOwnerName: project_team_owner_name,
-        teamOwnerRef: project_team_owner_ref,
-        rating: project_rating,
-        views: project_views,
-        version: project_version,
-      });
+      await iosApi.insertProject(
+        project_title,
+        entity_ref,
+        project_description,
+        project_manager_username,
+        project_manager_ref,
+        project_docs_ref,
+        project_life_cycle_status,
+        project_team_owner_name,
+        project_team_owner_ref,
+        project_rating,
+        project_views,
+        project_version
+      );
       handleCloseDialog();
     } catch (error) {
       console.error('Error adding project:', error);
@@ -134,7 +150,9 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   };
 
   const handleEntityClick = (entity: Entity) => {
-    setEntityRef(stringifyEntityRef(entity));
+    const entityReference = stringifyEntityRef(entity);
+    setEntityRef(entityReference);
+    console.log('Selected entity reference:', entityReference);
   };
 
   return (
@@ -152,7 +170,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           catalogEntities={catalogEntities}
           onChange={handleEntityClick}
           disableClearable={true}
-          defaultValue={catalogEntities[0] || null}
+          defaultValue={ null}
           label="Select Project Entity"
         />
         <TextField
@@ -184,7 +202,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
-          error={hasError(project_manager_ref)}
+          error={hasError(project_manager_ref)} // Pass boolean
           helperText={hasError(project_manager_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
@@ -194,40 +212,24 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
-          error={hasError(project_docs_ref)}
+          error={hasError(project_docs_ref)} // Pass boolean
           helperText={hasError(project_docs_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
-          label="Life Cycle"
-          value={project_life_cycle_status}
-          onChange={(e) => setProjectLifeCycleStatus(e.target.value)}
-          multiline
-          rows={2}
+          label="Project Team Owner Name"
+          value={project_team_owner_name}
+          onChange={(e) => setProjectTeamOwnerName(e.target.value)}
           margin="normal"
           required
         />
-        <FormControl fullWidth margin="normal" required>
-          <InputLabel>Team Owner</InputLabel>
-          <Select
-            value={project_team_owner_name}
-            onChange={(e) => setProjectTeamOwnerName(e.target.value)}
-          >
-            {groups.map((group) => (
-              <MenuItem key={group.metadata.uid} value={group.metadata.name}>
-                {group.metadata.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
         <TextField
-          label="Team Link"
+          label="Team Owner Link"
           value={project_team_owner_ref}
           onChange={(e) => setProjectTeamOwnerRef(e.target.value)}
           multiline
           rows={2}
           margin="normal"
-          required
-          error={hasError(project_team_owner_ref)}
+          error={hasError(project_team_owner_ref)} // Pass boolean
           helperText={hasError(project_team_owner_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
@@ -235,19 +237,25 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           value={project_version}
           onChange={(e) => setProjectVersion(e.target.value)}
           margin="normal"
-          required
         />
+        <FormControl fullWidth margin="normal" required>
+          <InputLabel>Lifecycle Status</InputLabel>
+          <Select
+            value={project_life_cycle_status}
+            onChange={(e) => setProjectLifeCycleStatus(e.target.value)}
+          >
+            <MenuItem value="Planning">Planning</MenuItem>
+            <MenuItem value="In Progress">In Progress</MenuItem>
+            <MenuItem value="Completed">Completed</MenuItem>
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
-        <Button
-          onClick={handleSubmit}
-          color="primary"
-          disabled={!isFormValid()}
-        >
-          Add
-        </Button>
-        <Button onClick={handleCloseDialog} color="primary">
+        <Button onClick={handleCloseDialog} color="secondary">
           Cancel
+        </Button>
+        <Button onClick={handleSubmit} color="primary" disabled={!isFormValid()}>
+          Add Project
         </Button>
       </DialogActions>
     </Dialog>

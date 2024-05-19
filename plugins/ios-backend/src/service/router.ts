@@ -32,7 +32,7 @@ export async function createRouter(
   router.post('/projects', async (request, response) => {
     const { 
       project_title,
-      enitity_ref, 
+      entity_ref, 
       project_description, 
       project_manager_username, 
       project_manager_ref,
@@ -48,7 +48,7 @@ export async function createRouter(
     try {
       await dbHandler.insertProject(
         project_title, 
-        enitity_ref,
+        entity_ref,
         project_description, 
         project_manager_username, 
         project_manager_ref,
@@ -75,7 +75,7 @@ export async function createRouter(
 
     const {
       project_title, 
-      enitity_ref,
+      entity_ref,
       project_description, 
       project_manager_username,
       project_manager_ref,
@@ -91,7 +91,7 @@ export async function createRouter(
 
     const updates: { 
       project_title?: string, 
-      enitity_ref?: string,
+      entity_ref?: string,
       project_description?: string, 
       project_manager_username?: string, 
       project_manager_ref?: string,
@@ -107,8 +107,8 @@ export async function createRouter(
       updates.project_title = project_title;
     }
 
-    if (enitity_ref) {
-      updates.enitity_ref = enitity_ref;
+    if (entity_ref) {
+      updates.entity_ref = entity_ref;
     }
 
     if (project_description) {
