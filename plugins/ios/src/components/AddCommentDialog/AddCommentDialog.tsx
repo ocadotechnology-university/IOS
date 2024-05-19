@@ -49,7 +49,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
 
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [catalogEntities, setCatalogEntities] = useState([]); // New state for catalog entities
+  const [catalogEntities, setCatalogEntities] = useState([]); 
   const catalogApi = useApi(catalogApiRef);
   const iosApi = useApi(iosApiRef);
 
@@ -68,7 +68,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
 
     const fetchCatalogEntities = async () => {
       const entities = await catalogApi.getEntities({
-        filter:  { kind: 'component'}
+        filter: { kind: 'component' }
       });
       setCatalogEntities(entities.items);
     };
@@ -77,7 +77,6 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
     fetchCatalogEntities();
   }, [catalogApi]);
 
-  
   useEffect(() => {
     console.log('Selected entity reference:', entity_ref);
   }, [entity_ref]);
@@ -110,24 +109,10 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       console.error('Invalid form data');
       return;
     }
-
-    console.log('Form data:', {
-      project_title,
-      entity_ref,
-      project_description,
-      project_manager_username,
-      project_manager_ref,
-      project_docs_ref,
-      project_life_cycle_status,
-      project_team_owner_name,
-      project_team_owner_ref,
-      project_rating,
-      project_views,
-      project_version,
-    });
-
+  
     try {
-      await iosApi.insertProject(
+      console.log("HELLO, HELLO", entity_ref);
+      const projectIdResponse = await iosApi.insertProject(
         project_title,
         entity_ref,
         project_description,
@@ -141,18 +126,31 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
         project_views,
         project_version
       );
-      handleCloseDialog();
+  
+      const projectId = projectIdResponse.project_id.project_id;
+  
+      if (!projectId) {
+        console.error('Failed to retrieve project ID');
+        return;
+      }
+  
+      const userReferences = users.map(user => stringifyEntityRef(user)).join(', ');
+  
+      await iosApi.insertMember(
+        projectId,
+        userReferences,
+      );
+  
     } catch (error) {
       console.error('Error adding project:', error);
-    } finally {
-      handleCloseDialog();
     }
+    handleCloseDialog();
   };
 
   const handleEntityClick = (entity: Entity) => {
+    console.log('Entity class/kind:', entity.kind);
     const entityReference = stringifyEntityRef(entity);
     setEntityRef(entityReference);
-    console.log('Selected entity reference:', entityReference);
   };
 
   return (
@@ -170,7 +168,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           catalogEntities={catalogEntities}
           onChange={handleEntityClick}
           disableClearable={true}
-          defaultValue={ null}
+          defaultValue={null}
           label="Select Project Entity"
         />
         <TextField
@@ -202,7 +200,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
-          error={hasError(project_manager_ref)} // Pass boolean
+          error={hasError(project_manager_ref)} 
           helperText={hasError(project_manager_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
@@ -212,7 +210,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
-          error={hasError(project_docs_ref)} // Pass boolean
+          error={hasError(project_docs_ref)} 
           helperText={hasError(project_docs_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
@@ -229,7 +227,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           multiline
           rows={2}
           margin="normal"
-          error={hasError(project_team_owner_ref)} // Pass boolean
+          error={hasError(project_team_owner_ref)}
           helperText={hasError(project_team_owner_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
