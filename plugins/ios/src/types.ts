@@ -18,7 +18,6 @@ export type Project = {
 
 export type Member = {
     user_id: number;
-    username: string;
+    user_entity_ref: string,
     user_avatar: string;
-    entity_ref: string;
 }

@@ -43,7 +43,8 @@ export interface IosApi {
   ): Promise <Project[]>;
   getMembers(project_id: number): Promise <Member[]>
   insertMember( 
-    username: string
+    project_id: number,
+    user_entity_ref: string,
   ): Promise <void>;
 }
 
@@ -184,13 +185,15 @@ export class IosClient implements IosApi {
   }
 
   async insertMember(
-    username: string,
+    project_id: number,
+    user_entity_ref: string,
   ) : Promise <void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/ios_members`;
-    const { user_avatar } = await this.identityApi.getProfileInfo();
-    const payload = { username, user_avatar}
-
+    //const { user_avatar } = await this.identityApi.getProfileInfo();
+    const payload = { project_id, user_entity_ref}
+    console.log("IOSAPI + ", project_id);
+    console.log("IOSAPI2 + ", user_entity_ref);
     const response = await this.fetchApi.fetch(url, {
       method: 'POST',
       headers: {

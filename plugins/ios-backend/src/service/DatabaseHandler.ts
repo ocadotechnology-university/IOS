@@ -40,34 +40,37 @@ export class DatabaseHandler {
     project_rating: number,
     project_views: number,
     project_version: string,
-): Promise<void> {
+  ): Promise<number> {
     try {
-        const date = new Date();
-        const preciseStartDate = date.toISOString().slice(0, 19).replace('T', ' ');
-        
-        await this.client('ios-table')
-            .insert({ 
-                project_title, 
-                entity_ref,
-                project_description, 
-                project_manager_username, 
-                project_manager_ref,
-                project_docs_ref,
-                project_life_cycle_status,
-                project_team_owner_name,
-                project_team_owner_ref,
-                project_rating,
-                project_views,
-                project_version,
-                project_start_date: preciseStartDate, 
-                project_update_date: preciseStartDate,
-            }); 
-        console.log(`Project inserted successfully`);
+      const date = new Date();
+      const preciseStartDate = date.toISOString().slice(0, 19).replace('T', ' ');
+      
+      const [project_id] = await this.client('ios-table').insert({ 
+        project_title, 
+        entity_ref,
+        project_description, 
+        project_manager_username, 
+        project_manager_ref,
+        project_docs_ref,
+        project_life_cycle_status,
+        project_team_owner_name,
+        project_team_owner_ref,
+        project_rating,
+        project_views,
+        project_version,
+        project_start_date: preciseStartDate, 
+        project_update_date: preciseStartDate,
+      }).returning('project_id'); // Return the auto-generated project_id
+      
+      console.log(`Project inserted successfully with ID: ${project_id}`);
+      return project_id;
     } catch (error) {
-        console.error('Error inserting Project:', error);
-        throw error;
+      console.error('Error inserting Project:', error);
+      throw error;
     }
-}
+    
+  }
+  
 
   async updateProjectViews(
     project_id: number,
@@ -191,17 +194,28 @@ export class DatabaseHandler {
     }
   }
   
-  async addUser(
-    username: string,
-    user_avatar?: string,
-    userEntityRef?: string,
+  async addUser(user_project_id: number, user_entity_ref: string): Promise<void> {
+    console.log(`Adding user with project_id: ${user_project_id}, entity_ref: ${user_entity_ref}`);
 
-  ): Promise<void> {
-    await this.client.insert({
-      username: username,
-      user_avatar: user_avatar,
-      entity_ref: userEntityRef
-    }).into('ios-table-users');
+    const user = await this.client('ios-table-users')
+      .select('user_projects_ids')
+      .where({ user_entity_ref })
+      .first();
+
+    console.log(`User found: ${JSON.stringify(user)}`);
+
+    if (user) {
+      await this.client.raw(`
+        UPDATE "ios-table-users"
+        SET "user_projects_ids" = array_append(user_projects_ids, ?)
+        WHERE "user_entity_ref" = ?
+      `, [user_project_id, user_entity_ref]);
+    } else {
+      await this.client('ios-table-users').insert({
+        user_entity_ref,
+        user_projects_ids: [user_project_id] // Initialize with the project ID
+      });
+    }
   }
 
   async updateUserProjects(
@@ -211,7 +225,6 @@ export class DatabaseHandler {
     try {
       const projectsArray = "{" + user_projects_ids.join(",") + "}";
 
-        // Execute raw SQL query to update the user_projects_ids
         await this.client.raw(`
             UPDATE "ios-table-users"
             SET "user_projects_ids" = ?

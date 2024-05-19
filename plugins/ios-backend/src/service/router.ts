@@ -43,10 +43,10 @@ export async function createRouter(
       project_rating,
       project_views,
       project_version,
-
     } = request.body;
+    
     try {
-      await dbHandler.insertProject(
+      const projectId = await dbHandler.insertProject(
         project_title, 
         entity_ref,
         project_description, 
@@ -60,15 +60,15 @@ export async function createRouter(
         project_views,
         project_version,
       );
-      response.status(200).send('Project inserted successfully.');
+  
+      // Respond with the project_id
+      response.status(200).json({ project_id: projectId });
     } catch (error) {
       console.error('Error inserting project:', error);
       response.status(500).send('Internal server error');
     }
   });
   
-  
-
   router.put('/projects/:project_id', async (request, response) => {
     const project_id_str = request.params.project_id;
     const project_id = parseInt(project_id_str, 10); 
@@ -196,16 +196,14 @@ export async function createRouter(
 
   router.post('/ios_members', async (request, response) => {
     const { 
-      username,
-      user_avatar,
+      project_id,
+      user_entity_ref,
     } = request.body;
-    const user = await identity.getIdentity({ request: request });
-    const userEntityRef = user?.identity.userEntityRef
+    console.log("PROJECTID AND USERENTITYREF:", project_id, user_entity_ref)
     try {
       await dbHandler.addUser(
-        username,
-        user_avatar,
-        userEntityRef,
+        project_id,
+        user_entity_ref,
       );
       response.status(200).send('User created successfully.');
     } catch (error) {
