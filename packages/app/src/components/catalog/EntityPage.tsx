@@ -1,6 +1,8 @@
 import React from 'react';
 import { EntityBazaarInfoCard, isBazaarAvailable } from '@backstage/plugin-bazaar';
 import { Button, Grid } from '@material-ui/core';
+import { Card, CardHeader, CardContent } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import {
   EntityApiDefinitionCard,
   EntityConsumedApisCard,
@@ -58,6 +60,9 @@ import {
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
+import { ProjectOverview } from '@internal/backstage-plugin-ios/src/components/ProjectOverview';
+import { ProjectInfo } from '@internal/backstage-plugin-ios/src/components/ProjectInfo';
+import { Projects} from '@internal/backstage-plugin-ios/src/components/ProjectItemCards';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -94,6 +99,72 @@ const cicdContent = (
   </EntitySwitch>
 );
 
+const DiscussionContent = (
+  //empty discussion 
+  <EntitySwitch>
+    <EntitySwitch.Case>
+      <EmptyState
+        title="No Discussions available for this entity"
+        missing="info"
+        description="You need to add an annotation"
+        action={
+          <Button
+            variant="contained"
+            color="primary"
+            href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          >
+            LOL
+          </Button>
+        }
+      />
+    </EntitySwitch.Case>
+  </EntitySwitch>
+);
+
+const SourcesContent = (
+  //empty discussion 
+  <EntitySwitch>
+    <EntitySwitch.Case>
+      <EmptyState
+        title="No Sources available for this entity"
+        missing="info"
+        description="You need to add Source data"
+        action={
+          <Button
+            variant="contained"
+            color="primary"
+            href="https://www.youtube.com/watch?v=X0EutxGBV2k"
+          >
+            LOL-3
+          </Button>
+        }
+      />
+    </EntitySwitch.Case>
+  </EntitySwitch>
+);
+
+const InfoContent = (
+  //empty discussion 
+  <EntitySwitch>
+    <EntitySwitch.Case>
+      <EmptyState
+        title="No Info available for this entity"
+        missing="info"
+        description="You need to add info"
+        action={
+          <Button
+            variant="contained"
+            color="primary"
+            href="https://www.youtube.com/watch?v=-8gySW7duCU"
+          >
+            LOL-2
+          </Button>
+        }
+      />
+    </EntitySwitch.Case>
+  </EntitySwitch>
+);
+
 const entityWarningContent = (
   <>
     <EntitySwitch>
@@ -122,6 +193,31 @@ const entityWarningContent = (
   </>
 );
 
+const useStyles = makeStyles((theme) => ({
+  cardContent: {
+    maxHeight: 400, // Adjust as needed
+    overflowY: 'auto',
+  },
+  card: {
+    width: '100%', 
+  },
+}));
+const ProjectsGridItem = () => {
+  const classes = useStyles();
+
+  return (
+    <Grid item md={12} xs={12}>
+      <Card>
+        <CardHeader title="Projects" />
+        <CardContent className={classes.cardContent}>
+          <Projects variant="gridItem" height={400} />
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+};
+
+
 const overviewContent = (
   <Grid container spacing={3} alignItems="stretch">
     {entityWarningContent}
@@ -138,7 +234,9 @@ const overviewContent = (
     <Grid item md={6} xs={12}>
       <EntityCatalogGraphCard variant="gridItem" height={400} />
     </Grid>
-
+    <Grid item md={6} xs={12}>
+    <ProjectsGridItem />
+    </Grid>
     <Grid item md={4} xs={12}>
       <EntityLinksCard />
     </Grid>
@@ -156,6 +254,18 @@ const serviceEntityPage = (
 
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
       {cicdContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/Discussion" title="Discussion">
+      {DiscussionContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/Info" title="Info">
+      {InfoContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/Sources" title="Sources">
+      {SourcesContent}
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/api" title="API">
@@ -194,6 +304,18 @@ const websiteEntityPage = (
 
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
       {cicdContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/Discussion" title="Discussion">
+      {DiscussionContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/Info" title="Info">
+      {InfoContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/Sources" title="Sources">
+      {SourcesContent}
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
