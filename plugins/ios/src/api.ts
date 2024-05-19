@@ -9,7 +9,7 @@ export const iosApiRef = createApiRef<IosApi>({
 export interface IosApi {
   insertProject(
     project_title: string,
-    enitity_ref: string, 
+    entity_ref: string, 
     project_description: string, 
     project_manager_username: string,
     project_manager_ref: string,
@@ -26,7 +26,7 @@ export interface IosApi {
 
   updateProject(
     project_id: number,
-    enitity_ref: string,
+    entity_ref: string,
     project_title: string, 
     project_description: string, 
     project_manager_username: string, 
@@ -43,7 +43,8 @@ export interface IosApi {
   ): Promise <Project[]>;
   getMembers(project_id: number): Promise <Member[]>
   insertMember( 
-    username: string
+    project_id: number,
+    user_entity_ref: string,
   ): Promise <void>;
 }
 
@@ -64,7 +65,7 @@ export class IosClient implements IosApi {
 
   async insertProject(
     project_title: string, 
-    enitity_ref: string,
+    entity_ref: string,
     project_description: string, 
     project_manager_username: string, 
     project_manager_ref: string,
@@ -81,7 +82,7 @@ export class IosClient implements IosApi {
   
     const payload = {
       project_title, 
-      enitity_ref,
+      entity_ref,
       project_description, 
       project_manager_username, 
       project_manager_ref,
@@ -137,7 +138,7 @@ export class IosClient implements IosApi {
 
   async updateProject(
     project_id: number,
-    enitity_ref?: string,
+    entity_ref?: string,
     project_title?: string, 
     project_description?: string, 
     project_manager_username?: string,
@@ -153,7 +154,7 @@ export class IosClient implements IosApi {
     
     const payload = {
       project_title, 
-      enitity_ref,
+      entity_ref,
       project_description, 
       project_manager_username,
       project_manager_ref,
@@ -184,13 +185,15 @@ export class IosClient implements IosApi {
   }
 
   async insertMember(
-    username: string,
+    project_id: number,
+    user_entity_ref: string,
   ) : Promise <void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/ios_members`;
-    const { user_avatar } = await this.identityApi.getProfileInfo();
-    const payload = { username, user_avatar}
-
+    //const { user_avatar } = await this.identityApi.getProfileInfo();
+    const payload = { project_id, user_entity_ref}
+    console.log("IOSAPI + ", project_id);
+    console.log("IOSAPI2 + ", user_entity_ref);
     const response = await this.fetchApi.fetch(url, {
       method: 'POST',
       headers: {
