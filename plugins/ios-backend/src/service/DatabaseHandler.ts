@@ -239,7 +239,7 @@ export class DatabaseHandler {
     }
   }
   
-  async addUser(user_project_id: number, user_entity_ref: string): Promise<void> {
+  async addUser(user_project_id: number, user_entity_ref: string, user_avatar: string): Promise<void> {
     console.log(`Adding user with project_id: ${user_project_id}, entity_ref: ${user_entity_ref}`);
 
     const user = await this.client('ios-table-users')
@@ -258,7 +258,8 @@ export class DatabaseHandler {
     } else {
       await this.client('ios-table-users').insert({
         user_entity_ref,
-        user_projects_ids: [user_project_id] // Initialize with the project ID
+        user_projects_ids: [user_project_id], // Initialize with the project ID
+        user_avatar
       });
     }
   }
@@ -285,11 +286,20 @@ export class DatabaseHandler {
 
   async getUsersByProjectID(projectId: number): Promise<Array<{ user_id: number; username: string; user_avatar: string; entity_ref: string }>> {
     const result = await this.client
-        .select('user_id', 'username', 'user_avatar', 'entity_ref')
+        .select('user_avatar', 'user_entity_ref')
         .from('ios-table-users')
         .whereRaw('? = ANY(user_projects_ids)', [projectId]);
     return result;
   }
+
+  async getUserByRef(EntityRef: string): Promise<{ user_avatar: string,}[]> {
+    const result = await this.client('ios-table-users')
+        .select('user_avatar')
+        .where('user_entity_ref', EntityRef);
+    return result;
+  }
+
+
 
   async insertComment(
     project_id_ref: number,
@@ -324,7 +334,7 @@ export class DatabaseHandler {
 
   async getCommentsByProjectID(projectId: number): Promise<{ 
     comment_id: number,
-    user_id_ref: number,
+    user_id_ref: string,
     comment_text: string,
     comment_date: Date,
     comment_version: string,

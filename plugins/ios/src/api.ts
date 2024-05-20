@@ -58,6 +58,9 @@ export interface IosApi {
   getComments(
     project_id_ref: number,
   ): Promise<Comment[]>
+  getUserData(
+    user_ref: string,
+  ): Promise<Member[]>
 }
 
 export class IosClient implements IosApi {
@@ -266,6 +269,33 @@ export class IosClient implements IosApi {
     return await this.fetchApi
       .fetch(url)
       .then(res => res.json());
+  }
+
+  async getUserData(user_ref: string): Promise<Member[]> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/ios_members/data`;
+
+    const payload = {
+        user_ref,
+    };
+
+    try {
+        const response = await this.fetchApi.fetch(url, {
+            method: 'POST',  // Change to POST method
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),  // Include payload in the body
+        });
+        if (!response.ok) {
+            throw new Error(`Error fetching user data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error; // Re-throw the error to handle it in the calling function
+    }
   }
 
 }  

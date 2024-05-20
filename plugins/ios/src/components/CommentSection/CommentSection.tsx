@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { TextField, Button, List, ListItem, ListItemText, Avatar, Grid, Paper, Divider, MenuItem, FormControl, InputLabel, Select } from '@material-ui/core';
+import { TextField, Button, Avatar, Grid, Paper, Divider } from '@material-ui/core';
 import { useApi } from '@backstage/core-plugin-api';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
+import { identityApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 
@@ -14,64 +15,104 @@ const useStyles = makeStyles((theme) => ({
   },
   commentBox: {
     display: 'flex',
+    flexDirection: 'row',
     gap: theme.spacing(1),
+    alignItems: 'center',
   },
   textField: {
     flex: 1,
   },
   button: {
-    height: 'fit-content',
+    height: 60,
+    width: 60,
   },
 }));
 
-const imgLink = "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260";
+const defaultImgLink = "https://static.vecteezy.com/system/resources/thumbnails/008/442/086/small/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg";
 
 export const CommentSection = ({ projectId }) => {
   const classes = useStyles();
   const catalogApi = useApi(catalogApiRef);
+  const identityApi = useApi(identityApiRef);
   const iosApi = useApi(iosApiRef);
 
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const userEntities = await catalogApi.getEntities({
-        filter: { kind: 'user' },
-      });
-      setUsers(userEntities.items);
-    };
-
-    const fetchComments = async () => {
+    const fetchUserAndComments = async () => {
       try {
-        const comments = await iosApi.getComments(projectId);
-        console.log("fdsafsa",comments);
-        setComments(comments);
+        // Fetch the current user identity
+        const { userEntityRef } = await identityApi.getBackstageIdentity();
+        setSelectedUser(userEntityRef);
+
+        // Fetch comments and user data
+        await fetchComments();
       } catch (error) {
-        console.error('Error fetching comments:', error);
+        console.error('Error fetching user or comments:', error);
       }
     };
 
-    fetchUsers();
-    fetchComments();
-  }, [catalogApi, iosApi, projectId]);
+    fetchUserAndComments();
+  }, [catalogApi, identityApi, iosApi, projectId]);
+
+  const fetchComments = async () => {
+    try {
+      const comments = await iosApi.getComments(projectId);
+      console.log('Fetched comments:', comments);  // Log the fetched comments
+
+      // Fetch user data for each comment
+      const commentsWithUserData = await Promise.all(
+        comments.map(async (comment) => {
+          try {
+            console.log('Fetching user data for:', comment.user_id_ref);
+            const userEntity = await catalogApi.getEntityByRef(comment.user_id_ref);
+            const userDataArray = await iosApi.getUserData(comment.user_id_ref);
+            const userData = userDataArray[0];  // Extract the first element if it's an array
+            console.log('Fetched user data:', userData);  // Log the fetched user data
+            return {
+              ...comment,
+              user_avatar: userData.user_avatar || defaultImgLink,
+              user_name: userEntity.metadata.name || 'Unknown User',
+            };
+          } catch (error) {
+            console.error('Error fetching user data for comment:', comment.user_id_ref, error);
+            return {
+              ...comment,
+              user_avatar: defaultImgLink, // Fallback if no avatar is found
+              user_name: 'Unknown User',
+            };
+          }
+        })
+      );
+
+      setComments(commentsWithUserData);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
 
   const handleCommentSubmit = async () => {
-    
-    const userEntity = users.find(user => user.metadata.uid === selectedUser);
-    const userRef = stringifyEntityRef(userEntity);
-    console.log('LOGLOG:', userRef, projectId, newComment); // Log the response for debugging
-    await iosApi.insertComment(projectId, userRef, newComment);
-    setNewComment(''); // Clear the comment input
-    setSelectedUser(''); // Clear the selected user
-    // Refresh comments after adding a new one
-    const comments = await iosApi.getComments(projectId);
-    setComments(comments);
-    
-    fetchComments();
+    try {
+      console.log('comentSub');
+      const userEntity = await catalogApi.getEntityByRef(selectedUser);
+      const userRef = stringifyEntityRef(userEntity);
+      console.log('LOGLOG:', userRef, projectId, newComment); // Log the response for debugging
+      await iosApi.insertComment(projectId, userRef, newComment);
+      // Refresh comments after adding a new one
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
 
+    try {
+      console.log('fetch');
+      setNewComment(''); // Clear the comment input
+      await fetchComments();
+    } catch (error) {
+      console.error('Error await fetch comment:', error);
+    }
+    
   };
 
   return (
@@ -82,12 +123,14 @@ export const CommentSection = ({ projectId }) => {
           <div key={comment.comment_id}>
             <Grid container wrap="nowrap" spacing={2}>
               <Grid item>
-                <Avatar alt="User Avatar" src={imgLink} />
+                <Avatar alt="User Avatar" src={comment.user_avatar || defaultImgLink} />
               </Grid>
-              <Grid justifyContent="left" item xs zeroMinWidth>
-                <h4 style={{ margin: 0, textAlign: "left" }}>{comment.user_ref}</h4>
+              <Grid item xs zeroMinWidth>
+                <h4 style={{ margin: 0, textAlign: "left" }}>{comment.user_name}</h4>
                 <p style={{ textAlign: "left" }}>{comment.comment_text}</p>
-                <p style={{ textAlign: "left", color: "gray" }}>posted {new Date(comment.comment_date).toLocaleString()}</p>
+                <p style={{ textAlign: "left", color: "gray" }}>
+                  posted {new Date(comment.comment_date).toLocaleString()}&nbsp;&nbsp;for version {comment.comment_version}
+                </p>
               </Grid>
             </Grid>
             <Divider variant="fullWidth" style={{ margin: "30px 0" }} />
@@ -96,19 +139,6 @@ export const CommentSection = ({ projectId }) => {
       </Paper>
       <Paper style={{ padding: "40px 20px", marginTop: 10 }}>
         <div className={classes.commentBox}>
-          <FormControl fullWidth margin="normal" required>
-            <InputLabel>User</InputLabel>
-            <Select
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-            >
-              {users.map((user) => (
-                <MenuItem key={user.metadata.uid} value={user.metadata.uid}>
-                  {user.metadata.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <TextField
             className={classes.textField}
             value={newComment}

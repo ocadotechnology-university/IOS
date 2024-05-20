@@ -207,16 +207,30 @@ export async function createRouter(
     }
   });
 
+  router.post('/ios_members/data', async (request, response) => {  // Change to POST method
+    const { user_ref } = request.body;  // Extract user_ref from request body
+    try {
+        const user = await dbHandler.getUserByRef(user_ref);
+        response.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        response.status(500).send('Internal server error');
+    }
+  });
+
+
   router.post('/ios_members', async (request, response) => {
     const { 
       project_id,
       user_entity_ref,
+      user_avatar // Add the new field here
     } = request.body;
     console.log("PROJECTID AND USERENTITYREF:", project_id, user_entity_ref)
     try {
       await dbHandler.addUser(
         project_id,
         user_entity_ref,
+        user_avatar // Include the avatar_url in the dbHandler method
       );
       response.status(200).send('User created successfully.');
     } catch (error) {
@@ -224,6 +238,7 @@ export async function createRouter(
       response.status(500).send('Internal server error');
     }
   });
+  
 
   router.put('/ios_members/:user_id', async (request, response) => {
     const user_id_str = request.params.user_id;
