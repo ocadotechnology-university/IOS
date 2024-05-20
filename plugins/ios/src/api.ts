@@ -152,7 +152,8 @@ export class IosClient implements IosApi {
     entity_ref: string,
   ): Promise<Project> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
-    const url = `${baseUrl}/projects/${entity_ref}`;
+    const encodedEntityRef = encodeURIComponent(entity_ref);
+    const url = `${baseUrl}/projects/${encodedEntityRef}`;
     return await this.fetchApi
     .fetch(url)
     .then(res => res.json());

@@ -64,6 +64,7 @@ import { ProjectOverview } from '@internal/backstage-plugin-ios/src/components/P
 import { ProjectInfo } from '@internal/backstage-plugin-ios/src/components/ProjectInfo';
 import { iosApiRef } from '@internal/backstage-plugin-ios/src/api';
 import { Projects} from '@internal/backstage-plugin-ios/src/components/ProjectItemCards';
+import { EntityOverviewCard } from '@internal/backstage-plugin-ios/src/components/EntityOverviewCard';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -147,27 +148,9 @@ const SourcesContent = (
 const InfoContent = (
   <EntitySwitch>
     <EntitySwitch.Case>
-      <EmptyState
-        title="No Info available for this entity"
-        missing="info"
-        description="You need to add info"
-        action={
-          <Button
-            variant="contained"
-            color="primary"
-            href="https://www.youtube.com/watch?v=-8gySW7duCU"
-          >
-            LOL-2
-          </Button>
-        }
-      />
+      < EntityOverviewCard />
     </EntitySwitch.Case>
-    <EntitySwitch.Case>
-      {/* Use the ProjectInfo component */}
-      <ProjectInfo entity_ref="component:default/example-website"   onDeleteClick={() => {}}
-  fetchProjects={() => {}}
- />
-    </EntitySwitch.Case>
+
   </EntitySwitch>
 );
 

@@ -29,28 +29,28 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
 
   useEffect(() => {
     if (project) {
-      setProjectTitle(project.project_title);
-      setProjectDescription(project.project_description);
-      setProjectManagerUsername(project.project_manager_username);
-      setProjectManagerRef(project.project_manager_ref);
-      setProjectDocsRef(project.project_docs_ref);
-      setProjectLifeCycleStatus(project.project_life_cycle_status);
-      setProjectTeamOwnerName(project.project_team_owner_name);
-      setProjectTeamOwnerRef(project.project_team_owner_ref);
-      setProjectVersion(project.project_version || ''); // Handle null or undefined
+      setProjectTitle(project.project_title || '');
+      setProjectDescription(project.project_description || '');
+      setProjectManagerUsername(project.project_manager_username || '');
+      setProjectManagerRef(project.project_manager_ref || '');
+      setProjectDocsRef(project.project_docs_ref || '');
+      setProjectLifeCycleStatus(project.project_life_cycle_status || '');
+      setProjectTeamOwnerName(project.project_team_owner_name || '');
+      setProjectTeamOwnerRef(project.project_team_owner_ref || '');
+      setProjectVersion(project.project_version || ''); 
     }
   }, [project]); 
 
   useEffect(() => {
     setIsValidForm(
-      project_title.trim() !== '' &&
-      project_description.trim() !== '' &&
-      project_manager_username.trim() !== '' &&
-      project_life_cycle_status.trim() !== '' &&
-      project_team_owner_name.trim() !== '' &&
-      project_manager_ref.trim() !== '' &&
-      project_docs_ref.trim() !== '' &&
-      project_version.trim() !== '' && // Add validation for project_version
+      project_title !== '' &&
+      project_description !== '' &&
+      project_manager_username !== '' &&
+      project_life_cycle_status !== '' &&
+      project_team_owner_name !== '' &&
+      project_manager_ref !== '' &&
+      project_docs_ref !== '' &&
+      project_version !== '' && 
       (!project_manager_ref || isValidUrl(project_manager_ref)) &&
       (!project_docs_ref || isValidUrl(project_docs_ref)) &&
       isValidUrl(project_team_owner_ref)
@@ -77,7 +77,7 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
       project_life_cycle_status,
       project_team_owner_name,
       project_team_owner_ref,
-      project_version, // Include project_version in updatedData
+      project_version, 
     };
   
     onSubmit(updatedData); 
