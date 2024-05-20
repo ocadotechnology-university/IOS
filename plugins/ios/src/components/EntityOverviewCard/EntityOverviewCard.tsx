@@ -19,27 +19,29 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
   const [project, setProject] = useState<any>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const entityRef = stringifyEntityRef(entity);
-        console.log("Entity Reference:", entityRef);
-        if (!entityRef) return;
-        
-        const fetchedProject = await iosApi.getProjectByRef(entityRef);
-        console.log("LOGLOGLOG: ", fetchedProject);
+  const fetchProjectData = async () => {
+    try {
+      const entityRef = stringifyEntityRef(entity);
+      console.log("Entity Reference:", entityRef);
 
-        if (fetchedProject && fetchedProject.length > 0) {
-          setProject(fetchedProject[0]);
-        } else {
-          console.error('No project found');
-        }
-      } catch (error) {
-        console.error('Error fetching project:', error);
+      if (!entityRef) return;
+
+      const fetchedProject = await iosApi.getProjectByRef(entityRef);
+      console.log("LOGLOGLOG: ", fetchedProject);
+
+      if (fetchedProject && fetchedProject.length > 0) {
+        setProject(fetchedProject[0]);
+      } else {
+        setProject(null);
+        console.error('No project found');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching project:', error);
+    }
+  };
 
-    fetchData();
+  useEffect(() => {
+    fetchProjectData();
   }, [iosApi, entity]);
 
   const handleDeleteClick = () => {
@@ -49,11 +51,19 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
   };
-
-  const handleDeleteConfirmed = () => {
-    handleCloseDeleteDialog();
-    // Additional logic if needed after deletion confirmation
+  const handleDeleteConfirmed = async () => {
+    setOpenDeleteDialog(false);
+    try {
+      await iosApi.deleteProject(project_id);
+      
+      
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    } finally{
+      fetchProjectData();
+    }
   };
+  
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -62,7 +72,7 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Paper style={{ flex: '1 1 45%', minWidth: '300px', padding: '16px' }}>
               <Typography variant="h6">Project Info</Typography>
-              <ProjectInfo project={project} onDeleteClick={handleDeleteClick} />
+              <ProjectInfo project={project} onDeleteClick={handleDeleteClick} fetchProjects={fetchProjectData} />
             </Paper>
             <Paper style={{ flex: '1 1 45%', minWidth: '300px', padding: '16px' }}>
               <Typography variant="h6">Project Files</Typography>
@@ -77,7 +87,7 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
       )}
       {openDeleteDialog && (
         <ProjectDeleteDialog
-          project_id={project_id}
+          project_id={project.project_id}
           onClose={handleCloseDeleteDialog}
           onDeleteConfirmed={handleDeleteConfirmed}
         />
@@ -85,5 +95,3 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
     </div>
   );
 };
-
-

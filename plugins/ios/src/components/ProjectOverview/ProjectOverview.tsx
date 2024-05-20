@@ -1,34 +1,33 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { CommentSection } from '../CommentSection';
 import { ProjectInfo } from '../ProjectInfo';
 import { ProjectFiles } from '../ProjectFiles';
-import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
-import { StatusIndicator } from '../StatusIndicator'; // Import the StatusIndicator component
+import { ProjectDeleteDialog } from '../ProjectDeleteDialog'; 
 
 type Props = {
   open: boolean;
   handleCloseDialog: () => void;
   project: any;
-  project_id: string;
+  project_id: string; 
 };
 
 const useStyles = makeStyles((theme) => ({
   paper: {
     margin: 0,
     maxHeight: '90vh',
-    maxWidth: '90vw',
+    maxWidth: '90vw', 
   },
 }));
 
 export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }: Props) => {
   const classes = useStyles();
   const [isEditable, setIsEditable] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); 
 
   if (!project) {
-    return null;
+    return null; 
   }
 
   const handleEditClick = () => {
@@ -40,12 +39,12 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
   };
 
   const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
+    setOpenDeleteDialog(false); 
   };
 
   const handleDeleteConfirmed = () => {
-    handleCloseDialog();
-    handleCloseDeleteDialog();
+    handleCloseDialog(); 
+    handleCloseDeleteDialog(); 
   };
 
   return (
@@ -59,16 +58,15 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
     >
       <DialogTitle>Project Overview</DialogTitle>
       <DialogContent>
-        <StatusIndicator status={project.status} /> {/* Add StatusIndicator here */}
-        <ProjectInfo project={project} onDeleteClick={handleDeleteClick} />
-        <ProjectFiles />
+        <ProjectInfo project={project} onDeleteClick={handleDeleteClick} /> 
+        <ProjectFiles/>
         <CommentSection projectId={project.project_id} />
       </DialogContent>
       {openDeleteDialog && (
         <ProjectDeleteDialog
           project_id={project_id}
           onClose={handleCloseDeleteDialog}
-          onDeleteConfirmed={handleDeleteConfirmed}
+          onDeleteConfirmed={handleDeleteConfirmed} 
         />
       )}
     </Dialog>

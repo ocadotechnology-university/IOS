@@ -36,6 +36,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
       iosApi.getProjectByRef(entity_ref)
         .then(project => setSelectedProject(project))
         .catch(error => console.error('Error fetching project:', error));
+      console.log("!!!!!!!!!!!!!!!!!!", selectedProject.project_id);
     }
   }, [project, entity_ref]);
 
@@ -55,6 +56,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   useEffect(() => {
     if (selectedProject && selectedProject.project_entity_ref) {
       const parsedEntity = parseEntityRef(selectedProject.project_entity_ref);
+      console.log("!!!!!!!!!!!!!!!!!!", selectedProject.project_id);
       setLinkedEntity(parsedEntity);
     }
   }, [selectedProject]);
@@ -197,7 +199,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
               ...updatedData,
             });
             await iosApi.updateProject(
-              selectedProject.project_id,
+              project.project_id,
               updatedData.project_title,
               updatedData.project_description,
               updatedData.project_manager_username,

@@ -75,7 +75,6 @@ export async function createRouter(
 
     const {
       project_title, 
-      entity_ref,
       project_description, 
       project_manager_username,
       project_manager_ref,
@@ -91,7 +90,6 @@ export async function createRouter(
 
     const updates: { 
       project_title?: string, 
-      entity_ref?: string,
       project_description?: string, 
       project_manager_username?: string, 
       project_manager_ref?: string,
@@ -102,13 +100,9 @@ export async function createRouter(
       project_version?: string,
       project_update_date?: string 
     } = {};
-    
+    console.log("!!!!!", updates);
     if (project_title){
       updates.project_title = project_title;
-    }
-
-    if (entity_ref) {
-      updates.entity_ref = entity_ref;
     }
 
     if (project_description) {

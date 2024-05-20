@@ -165,7 +165,6 @@ export class IosClient implements IosApi {
 
   async updateProject(
     project_id: number,
-    entity_ref?: string,
     project_title?: string, 
     project_description?: string, 
     project_manager_username?: string,
@@ -178,10 +177,8 @@ export class IosClient implements IosApi {
     ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/projects/${project_id}`;
-    
     const payload = {
       project_title, 
-      entity_ref,
       project_description, 
       project_manager_username,
       project_manager_ref,
@@ -192,6 +189,7 @@ export class IosClient implements IosApi {
       project_version,
     };
     
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!", payload);
     const response = await this.fetchApi.fetch(url, {
       method: 'PUT',
       headers: {
