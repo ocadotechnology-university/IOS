@@ -21,3 +21,12 @@ export type Member = {
     user_entity_ref: string,
     user_avatar: string;
 }
+
+export type Comment = {
+    comment_id: number;
+    project_id_ref: number;
+    user_id_ref: string;
+    comment_text: string;
+    comment_date: string;
+    comment_version: string;
+}

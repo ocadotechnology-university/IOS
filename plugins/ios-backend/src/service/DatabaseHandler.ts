@@ -180,6 +180,51 @@ export class DatabaseHandler {
     }
   }
 
+  async getProjectByEntityRef(entity_ref: string): Promise<{ 
+    project_id: number,
+    entity_ref: string,
+    project_title: string, 
+    project_description: string, 
+    project_manager_username: string,
+    project_manager_ref: string,
+    project_docs_ref: string,
+    project_life_cycle_status: string,
+    project_team_owner_name: string,
+    project_team_owner_ref: string,
+    project_rating: number,
+    project_views: number,
+    project_version: string,
+    project_start_date: Date,
+    project_update_date: Date 
+  }[]> {
+    try {
+      const projects = await this.client('ios-table')
+        .where('entity_ref', entity_ref)
+        .select(
+          'project_id',
+          'entity_ref',
+          'project_title', 
+          'project_description', 
+          'project_manager_username', 
+          'project_manager_ref',
+          'project_docs_ref',
+          'project_life_cycle_status',
+          'project_team_owner_name',
+          'project_team_owner_ref',
+          'project_rating',
+          'project_views',
+          'project_version',
+          'project_start_date',
+          'project_update_date',
+        );
+      return projects;
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      throw error;
+    }
+  }
+  
+
   async getProjectVersion(ProjectId: number): Promise<{ 
     project_version: string,
   }[]> {
@@ -248,14 +293,20 @@ export class DatabaseHandler {
 
   async insertComment(
     project_id_ref: number,
-    user_id_ref: number,
+    user_id_ref: string,
     comment_text: string,
     comment_version: string,
-
-      ): Promise<void> {
+  ): Promise<void> {
     try {
       const date = new Date();
       const comment_date = date.toISOString().slice(0, 19).replace('T', ' ');
+      console.log('Inserting comment with data:', {
+        project_id_ref,
+        user_id_ref,
+        comment_text,
+        comment_date,
+        comment_version
+      });
       await this.client('ios-table-comments')
         .insert({ 
           project_id_ref,
@@ -264,7 +315,7 @@ export class DatabaseHandler {
           comment_date,
           comment_version,
         }); 
-      console.log(`Comment inserted succesfully`);
+      console.log(`Comment inserted successfully`);
     } catch (error) {
       console.error('Error inserting comment:', error);
       throw error;
@@ -303,8 +354,6 @@ export class DatabaseHandler {
       throw error;
     }
   }
-
-
   
 
 

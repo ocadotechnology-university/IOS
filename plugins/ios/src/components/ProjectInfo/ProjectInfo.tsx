@@ -12,19 +12,32 @@ import { TimeSinceUpdate } from '../DateTime';
 import { TimeToDate } from "../DateTime"
 import { parseEntityRef } from '@backstage/catalog-model';
 
-type Props = {
-  project: any;
+type ProjectInfoProps = {
+  project?: any;
+  entity_ref?: string;
   onDeleteClick: () => void;
   fetchProjects: () => void;
 };
 
-export const ProjectInfo = ({ project, onDeleteClick, fetchProjects }: Props) => {
+export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects }: ProjectInfoProps) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(project);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [linkedEntity, setLinkedEntity] = useState(null);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
+
+  useEffect(() => {
+    // If project is provided, set selectedProject directly
+    if (project) {
+      setSelectedProject(project);
+    } else if (entity_ref) {
+      // Fetch project using entity_ref
+      iosApi.getProjectByRef(entity_ref)
+        .then(project => setSelectedProject(project))
+        .catch(error => console.error('Error fetching project:', error));
+    }
+  }, [project, entity_ref]);
 
   const handleEditClick = () => {
     setOpenUpdateDialog(true);
@@ -40,14 +53,11 @@ export const ProjectInfo = ({ project, onDeleteClick, fetchProjects }: Props) =>
   };
 
   useEffect(() => {
-    if (selectedProject.project_entity_ref) {
-      // Parse the entity reference using the parseEntityRef function
+    if (selectedProject && selectedProject.project_entity_ref) {
       const parsedEntity = parseEntityRef(selectedProject.project_entity_ref);
-      // Update state with the parsed entity data
       setLinkedEntity(parsedEntity);
     }
-  }, [selectedProject.project_entity_ref]);
-
+  }, [selectedProject]);
   return (
     <Grid container spacing={2}>
       <Grid container justifyContent='flex-end'>

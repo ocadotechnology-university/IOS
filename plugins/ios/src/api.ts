@@ -41,11 +41,23 @@ export interface IosApi {
   getProjects(
 
   ): Promise <Project[]>;
+
+  getProjectByRef(
+    entity_ref: string,
+  ): Promise<Project>
   getMembers(project_id: number): Promise <Member[]>
   insertMember( 
     project_id: number,
     user_entity_ref: string,
   ): Promise <void>;
+  insertComment(
+    project_id_ref: number,
+    user_ref: string,
+    comment_text: string,
+  ): Promise<void> ;
+  getComments(
+    project_id_ref: number,
+  ): Promise<Comment[]>
 }
 
 export class IosClient implements IosApi {
@@ -136,6 +148,17 @@ export class IosClient implements IosApi {
       .then(res => res.json());
   }
 
+  async getProjectByRef(
+    entity_ref: string,
+  ): Promise<Project> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/${entity_ref}`;
+    return await this.fetchApi
+    .fetch(url)
+    .then(res => res.json());
+    
+  }
+
   async updateProject(
     project_id: number,
     entity_ref?: string,
@@ -192,8 +215,6 @@ export class IosClient implements IosApi {
     const url = `${baseUrl}/ios_members`;
     //const { user_avatar } = await this.identityApi.getProfileInfo();
     const payload = { project_id, user_entity_ref}
-    console.log("IOSAPI + ", project_id);
-    console.log("IOSAPI2 + ", user_entity_ref);
     const response = await this.fetchApi.fetch(url, {
       method: 'POST',
       headers: {
@@ -207,6 +228,43 @@ export class IosClient implements IosApi {
     }
   
     return await response.json();
+  }
+  async insertComment(
+    project_id_ref: number,
+    user_ref: string,
+    comment_text: string,
+  ): Promise<void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/${project_id_ref}/comments`;
+  
+    const payload = {
+      user_ref,
+      comment_text,
+    };
+
+    const response = await this.fetchApi.fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload) 
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Failed to insert comment: ${response.statusText}`);
+    }
+  
+    return await response.json();
+
+  };
+
+  async getComments(project_id_ref: number): Promise<Comment[]> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/${project_id_ref}/comments`;
+
+    return await this.fetchApi
+      .fetch(url)
+      .then(res => res.json());
   }
 
 }  

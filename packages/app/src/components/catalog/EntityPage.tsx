@@ -62,6 +62,7 @@ import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 import { ProjectOverview } from '@internal/backstage-plugin-ios/src/components/ProjectOverview';
 import { ProjectInfo } from '@internal/backstage-plugin-ios/src/components/ProjectInfo';
+import { iosApiRef } from '@internal/backstage-plugin-ios/src/api';
 import { Projects} from '@internal/backstage-plugin-ios/src/components/ProjectItemCards';
 
 const techdocsContent = (
@@ -144,7 +145,6 @@ const SourcesContent = (
 );
 
 const InfoContent = (
-  //empty discussion 
   <EntitySwitch>
     <EntitySwitch.Case>
       <EmptyState
@@ -161,6 +161,12 @@ const InfoContent = (
           </Button>
         }
       />
+    </EntitySwitch.Case>
+    <EntitySwitch.Case>
+      {/* Use the ProjectInfo component */}
+      <ProjectInfo entity_ref="component:default/example-website"   onDeleteClick={() => {}}
+  fetchProjects={() => {}}
+ />
     </EntitySwitch.Case>
   </EntitySwitch>
 );

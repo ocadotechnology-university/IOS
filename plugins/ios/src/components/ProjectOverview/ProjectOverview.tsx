@@ -1,4 +1,3 @@
-// ProjectOverview.jsx
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -26,6 +25,10 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
   const classes = useStyles();
   const [isEditable, setIsEditable] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false); 
+
+  if (!project) {
+    return null; 
+  }
 
   const handleEditClick = () => {
     setIsEditable(true);
@@ -57,7 +60,7 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
       <DialogContent>
         <ProjectInfo project={project} onDeleteClick={handleDeleteClick} /> 
         <ProjectFiles/>
-        <CommentSection />
+        <CommentSection projectId={project.project_id} />
       </DialogContent>
       {openDeleteDialog && (
         <ProjectDeleteDialog

@@ -30,8 +30,8 @@ exports.up = async function up(knex) {
 
     await knex.schema.createTable('ios-table-comments', table => {
         table.increments('comment_id').notNullable().unique().comment("Unique ID of the comment");
-        table.integer('project_id_ref').notNullable().comment("Id of the project to that comment belongs");
-        table.integer('user_id_ref').notNullable().comment("Id of user that left comment");
+        table.integer('project_id_ref').comment("Id of the project to that comment belongs");
+        table.string('user_id_ref').notNullable().comment("Id of user that left comment");
         table.string('comment_text').notNullable().comment("Text of the comment");
         table.timestamp('comment_date').notNullable().comment("Date when comment was left");
         table.string('comment_version').notNullable().comment("Version of the project when comment was left");

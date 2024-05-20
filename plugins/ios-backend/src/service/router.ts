@@ -172,6 +172,7 @@ export async function createRouter(
   });
 
 
+  
   router.get('/projects', async (_, response) => {
     try {
       const projects = await dbHandler.getProjects();
@@ -181,7 +182,19 @@ export async function createRouter(
       response.status(500).send('Internal server error');
     }
   });
-  
+
+  router.get('/projects/:entity_ref', async (request, response) => {
+    const entity_ref = request.params.entity_ref;
+    console.log("HELLOHELLOHELLO: ", entity_ref);
+    try {
+      const project = await dbHandler.getProjectByEntityRef(entity_ref);
+      response.status(200).json(project);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
   router.get('/ios_members/:project_id', async (request, response) => {
     const projet_id_str = request.params.project_id;
     const project_id = parseInt(projet_id_str, 10);
@@ -232,7 +245,7 @@ export async function createRouter(
     const project_id_ref_str = request.params.project_id;
     const project_id_ref = parseInt(project_id_ref_str, 10);
     const { 
-      user_id_ref,
+      user_ref,
       comment_text,
     } = request.body;
     
@@ -244,7 +257,7 @@ export async function createRouter(
 
       await dbHandler.insertComment(
         project_id_ref,
-        user_id_ref,
+        user_ref,
         comment_text,
         comment_version,
       );
@@ -255,7 +268,7 @@ export async function createRouter(
     }
   });
 
-  router.get('/projects/:project_id', async (request, response) => {
+  router.get('/projects/:project_id/comments', async (request, response) => {
     const projet_id_str = request.params.project_id;
     const project_id = parseInt(projet_id_str, 10);
     try{ 
@@ -291,22 +304,6 @@ export async function createRouter(
       response.status(200).send('Project views updated successfully.');
     } catch (error) {
       console.error('Error updating project: views', error);
-      response.status(500).send('Internal server error.');
-    }
-  });
-
-  router.put('/projects/:project_id', async (request, response) => {
-    const project_id_str = request.params.project_id;
-    const project_id = parseInt(project_id_str, 10); 
-    const {
-      project_rating,
-    } = request.body
-    
-    try {
-      await dbHandler.updateProjectRating(project_id, project_rating);
-      response.status(200).send('Project rating updated successfully.');
-    } catch (error) {
-      console.error('Error updating project rating:', error);
       response.status(500).send('Internal server error.');
     }
   });
