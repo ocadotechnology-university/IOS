@@ -62,27 +62,21 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   }, [selectedProject]);
   return (
     <Grid container spacing={2}>
-      <Grid container justifyContent='flex-end'>
-        <Grid item xs={11}>
-          <h2>Project: {selectedProject.project_title}</h2>
+      <Grid container justifyContent='space-between' alignItems='center'>
+        <Grid item xs={6}>
+          <h1 style={{ fontSize: "30px", margin: "0" }}>Project: {selectedProject.project_title}</h1>
         </Grid>
-
-        <Grid item>
-          <IconButton size='medium' onClick={handleEditClick}>
+        <Grid item xs={3} container justifyContent='flex-end'>
+          <IconButton size='medium' onClick={handleEditClick} style={{ marginLeft: "8px" }}>
             <EditIcon />
           </IconButton>
-        </Grid>
-        <Grid item >
-          <IconButton size='medium' onClick={handleDeleteClick}>
+          <IconButton size='medium' onClick={handleDeleteClick} style={{ marginLeft: "8px" }}>
             <DeleteIcon />
           </IconButton>
         </Grid>
-        <Grid item >
-          <IconButton size='medium'>
-            <LinkIcon />
-          </IconButton>
-        </Grid>
       </Grid>
+
+      
       <Grid item xs={2} md={12}>
         <h4 style={{ color: 'rgba(209, 205, 205, 1)' }}>{selectedProject.project_description}</h4>
       </Grid>

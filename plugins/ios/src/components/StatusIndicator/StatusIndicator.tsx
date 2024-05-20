@@ -5,6 +5,7 @@ const useStyles = makeStyles((theme) => ({
   statusIndicator: {
     display: 'flex',
     alignItems: 'center',
+    marginBottom: theme.spacing(2), // Ensure there is some margin
   },
   statusCircle: {
     width: 10,
@@ -29,8 +30,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const StatusIndicator = ({ status }) => {
+export const StatusIndicator = ({ project }) => {
   const classes = useStyles();
+
+  const status = project.project_life_cycle_status;
+
 
   let statusClass;
   switch (status) {
@@ -46,12 +50,14 @@ export const StatusIndicator = ({ status }) => {
     case 'Launched':
       statusClass = classes.launched;
       break;
-    case 'Unsupported/End-of-Life':
+    case 'Archived':
       statusClass = classes.unsupported;
       break;
     default:
       statusClass = '';
   }
+
+  console.log('Applied class:', status);
 
   return (
     <div className={classes.statusIndicator}>

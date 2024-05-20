@@ -101,50 +101,6 @@ const cicdContent = (
   </EntitySwitch>
 );
 
-const DiscussionContent = (
-  //empty discussion 
-  <EntitySwitch>
-    <EntitySwitch.Case>
-      <EmptyState
-        title="No Discussions available for this entity"
-        missing="info"
-        description="You need to add an annotation"
-        action={
-          <Button
-            variant="contained"
-            color="primary"
-            href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          >
-            LOL
-          </Button>
-        }
-      />
-    </EntitySwitch.Case>
-  </EntitySwitch>
-);
-
-const SourcesContent = (
-  //empty discussion 
-  <EntitySwitch>
-    <EntitySwitch.Case>
-      <EmptyState
-        title="No Sources available for this entity"
-        missing="info"
-        description="You need to add Source data"
-        action={
-          <Button
-            variant="contained"
-            color="primary"
-            href="https://www.youtube.com/watch?v=X0EutxGBV2k"
-          >
-            LOL-3
-          </Button>
-        }
-      />
-    </EntitySwitch.Case>
-  </EntitySwitch>
-);
-
 const InfoContent = (
   <EntitySwitch>
     <EntitySwitch.Case>
@@ -245,16 +201,8 @@ const serviceEntityPage = (
       {cicdContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route path="/Discussion" title="Discussion">
-      {DiscussionContent}
-    </EntityLayout.Route>
-
     <EntityLayout.Route path="/Info" title="Info">
       {InfoContent}
-    </EntityLayout.Route>
-
-    <EntityLayout.Route path="/Sources" title="Sources">
-      {SourcesContent}
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/api" title="API">
@@ -295,17 +243,13 @@ const websiteEntityPage = (
       {cicdContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route path="/Discussion" title="Discussion">
-      {DiscussionContent}
-    </EntityLayout.Route>
+
 
     <EntityLayout.Route path="/Info" title="Info">
       {InfoContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route path="/Sources" title="Sources">
-      {SourcesContent}
-    </EntityLayout.Route>
+
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
       <Grid container spacing={3} alignItems="stretch">

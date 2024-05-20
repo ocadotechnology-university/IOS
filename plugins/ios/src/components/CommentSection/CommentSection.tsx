@@ -117,26 +117,7 @@ export const CommentSection = ({ projectId }) => {
 
   return (
     <div className="App">
-      <h1>Comments</h1>
-      <Paper style={{ padding: "40px 20px" }}>
-        {comments.map(comment => (
-          <div key={comment.comment_id}>
-            <Grid container wrap="nowrap" spacing={2}>
-              <Grid item>
-                <Avatar alt="User Avatar" src={comment.user_avatar || defaultImgLink} />
-              </Grid>
-              <Grid item xs zeroMinWidth>
-                <h4 style={{ margin: 0, textAlign: "left" }}>{comment.user_name}</h4>
-                <p style={{ textAlign: "left" }}>{comment.comment_text}</p>
-                <p style={{ textAlign: "left", color: "gray" }}>
-                  posted {new Date(comment.comment_date).toLocaleString()}&nbsp;&nbsp;for version {comment.comment_version}
-                </p>
-              </Grid>
-            </Grid>
-            <Divider variant="fullWidth" style={{ margin: "30px 0" }} />
-          </div>
-        ))}
-      </Paper>
+      <h1 style={{ fontSize: "30px" }} >Comments</h1>
       <Paper style={{ padding: "40px 20px", marginTop: 10 }}>
         <div className={classes.commentBox}>
           <TextField
@@ -156,6 +137,26 @@ export const CommentSection = ({ projectId }) => {
           </Button>
         </div>
       </Paper>
+      <Paper style={{ padding: "40px 20px" }}>
+        {comments.map(comment => (
+          <div key={comment.comment_id}>
+            <Grid container wrap="nowrap" spacing={2}>
+              <Grid item>
+                <Avatar alt="User Avatar" src={comment.user_avatar || defaultImgLink} />
+              </Grid>
+              <Grid item xs zeroMinWidth>
+                <h4 style={{ margin: 0, textAlign: "left" }}>{comment.user_name}</h4>
+                <p style={{ textAlign: "left" }}>{comment.comment_text}</p>
+                <p style={{ textAlign: "left", color: "gray" }}>
+                  posted {new Date(comment.comment_date).toLocaleString()}&nbsp;&nbsp;for version {comment.comment_version}
+                </p>
+              </Grid>
+            </Grid>
+            <Divider variant="fullWidth" style={{ margin: "30px 0" }} />
+          </div>
+        ))}
+      </Paper>
+
     </div>
   );
 };

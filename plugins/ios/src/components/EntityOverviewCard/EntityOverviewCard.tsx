@@ -71,16 +71,14 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
         <>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Paper style={{ flex: '1 1 45%', minWidth: '300px', padding: '16px' }}>
-              <Typography variant="h6">Project Info</Typography>
               <ProjectInfo project={project} onDeleteClick={handleDeleteClick} fetchProjects={fetchProjectData} />
             </Paper>
             <Paper style={{ flex: '1 1 45%', minWidth: '300px', padding: '16px' }}>
-              <Typography variant="h6">Project Files</Typography>
+              
               <ProjectFiles />
             </Paper>
           </div>
           <Paper style={{ flex: '1 1 100%', minWidth: '300px', padding: '16px' }}>
-            <Typography variant="h6">Comments</Typography>
             <CommentSection projectId={project.project_id} />
           </Paper>
         </>

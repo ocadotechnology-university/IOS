@@ -242,9 +242,11 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
             value={project_life_cycle_status}
             onChange={(e) => setProjectLifeCycleStatus(e.target.value)}
           >
-            <MenuItem value="Planning">Planning</MenuItem>
-            <MenuItem value="In Progress">In Progress</MenuItem>
-            <MenuItem value="Completed">Completed</MenuItem>
+            <MenuItem value="Conceptualization">Conceptualization</MenuItem>
+            <MenuItem value="Development">Development</MenuItem>
+            <MenuItem value="On Hold">On Hold</MenuItem>
+            <MenuItem value="Launched">Launched</MenuItem>
+            <MenuItem value="Archived">Archived</MenuItem>
           </Select>
         </FormControl>
       </DialogContent>
