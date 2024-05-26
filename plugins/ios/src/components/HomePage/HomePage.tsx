@@ -11,7 +11,7 @@ import {
   SupportButton,
 } from '@backstage/core-components';
 import { ProjectTable } from '../ProjectTable';
-import { AddProjectDialog } from '../AddCommentDialog/AddCommentDialog';
+import { AddProjectDialog } from '../AddProjectDialog/AddProjectDialog';
 import { Projects } from '../ProjectItemCards';
 import { iosApiRef } from '../../api';
 import { useApi,identityApiRef } from '@backstage/core-plugin-api';

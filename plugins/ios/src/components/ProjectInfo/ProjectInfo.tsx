@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Grid, TextField, IconButton } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import LinkIcon from '@material-ui/icons/Link';
+import { Content, Page } from '@backstage/core-components';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
@@ -10,8 +11,8 @@ import { iosApiRef } from '../../api';
 import { alertApiRef } from '@backstage/core-plugin-api';
 import { TimeSinceUpdate } from '../DateTime';
 import { TimeToDate } from "../DateTime"
+import {GithubRepoPreview} from "../GithubRepoPreview"
 import { parseEntityRef } from '@backstage/catalog-model';
-
 type ProjectInfoProps = {
   project?: any;
   entity_ref?: string;
@@ -216,6 +217,9 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
           }
         }}
       />
+    <Content>
+      <GithubRepoPreview owner="ocadotechnology-university" repo="IOS" />
+    </Content>
 
       {/* Render linked entity information */}
       {linkedEntity && (
