@@ -5,7 +5,8 @@ import { CommentSection } from '../CommentSection';
 import { ProjectInfo } from '../ProjectInfo';
 import { ProjectFiles } from '../ProjectFiles';
 import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
-import { StatusIndicator } from '../StatusIndicator'; // Ensure the correct import path
+import { StatusIndicator } from '../StatusIndicator'; 
+import { GithubRepoPreview } from '../GithubRepoPreview';
 
 type Props = {
   open: boolean;
@@ -64,7 +65,7 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
       <DialogContent>
         <StatusIndicator project={project} />
         <ProjectInfo project={project} onDeleteClick={handleDeleteClick} />
-        <ProjectFiles />
+        <GithubRepoPreview repoUrl='https://github.com/THU-MIG/yolov10' />
         <CommentSection projectId={project.project_id} />
       </DialogContent>
       {openDeleteDialog && (

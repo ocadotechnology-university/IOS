@@ -8,6 +8,7 @@ import { useEntity } from '@backstage/plugin-catalog-react';
 import { iosApiRef } from '../../api';
 import { useApi } from '@backstage/core-plugin-api';
 import { stringifyEntityRef } from '@backstage/catalog-model';
+import { GithubRepoPreview } from '../GithubRepoPreview';
 
 type Props = {
   project_id: string;
@@ -72,10 +73,6 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Paper style={{ flex: '1 1 45%', minWidth: '300px', padding: '16px' }}>
               <ProjectInfo project={project} onDeleteClick={handleDeleteClick} fetchProjects={fetchProjectData} />
-            </Paper>
-            <Paper style={{ flex: '1 1 45%', minWidth: '300px', padding: '16px' }}>
-              
-              <ProjectFiles />
             </Paper>
           </div>
           <Paper style={{ flex: '1 1 100%', minWidth: '300px', padding: '16px' }}>

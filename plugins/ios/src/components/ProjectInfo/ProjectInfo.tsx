@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, TextField, IconButton } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import LinkIcon from '@material-ui/icons/Link';
-import { Content, Page } from '@backstage/core-components';
+import { Content } from '@backstage/core-components';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
@@ -10,9 +9,10 @@ import { useApi } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { alertApiRef } from '@backstage/core-plugin-api';
 import { TimeSinceUpdate } from '../DateTime';
-import { TimeToDate } from "../DateTime"
-import {GithubRepoPreview} from "../GithubRepoPreview"
+import { TimeToDate } from "../DateTime";
+import { GithubRepoPreview } from "../GithubRepoPreview";
 import { parseEntityRef } from '@backstage/catalog-model';
+
 type ProjectInfoProps = {
   project?: any;
   entity_ref?: string;
@@ -29,15 +29,12 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   const alertApi = useApi(alertApiRef);
 
   useEffect(() => {
-    // If project is provided, set selectedProject directly
     if (project) {
       setSelectedProject(project);
     } else if (entity_ref) {
-      // Fetch project using entity_ref
       iosApi.getProjectByRef(entity_ref)
         .then(project => setSelectedProject(project))
         .catch(error => console.error('Error fetching project:', error));
-      console.log("!!!!!!!!!!!!!!!!!!", selectedProject.project_id);
     }
   }, [project, entity_ref]);
 
@@ -57,10 +54,10 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   useEffect(() => {
     if (selectedProject && selectedProject.project_entity_ref) {
       const parsedEntity = parseEntityRef(selectedProject.project_entity_ref);
-      console.log("!!!!!!!!!!!!!!!!!!", selectedProject.project_id);
       setLinkedEntity(parsedEntity);
     }
   }, [selectedProject]);
+
   return (
     <Grid container spacing={2}>
       <Grid container justifyContent='space-between' alignItems='center'>
@@ -77,7 +74,6 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
         </Grid>
       </Grid>
 
-      
       <Grid item xs={2} md={12}>
         <h4 style={{ color: 'rgba(209, 205, 205, 1)' }}>{selectedProject.project_description}</h4>
       </Grid>
@@ -92,8 +88,8 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
       </Grid>
       <Grid item xs={12} md={6}>
         <TextField
-          label="Project Initialization Date:"
-          value={TimeToDate({startDate :selectedProject.project_start_date})}
+          label="Project Initialization Date"
+          value={TimeToDate({ startDate: selectedProject.project_start_date })}
           margin="normal"
           fullWidth
           disabled
@@ -162,7 +158,6 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
           disabled
         />
       </Grid>
-
       <Grid item xs={12} md={6}>
         <TextField
           label="Project Version"
@@ -172,8 +167,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
           disabled
         />
       </Grid>
-      
-      {/* Conditionally render the delete dialog */}
+
       {openDeleteDialog && (
         <ProjectDeleteDialog
           project_id={project.project_id}
@@ -181,7 +175,6 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
         />
       )}
 
-      {/* Conditionally render the update dialog */}
       <UpdateProjectDialog
         open={openUpdateDialog}
         onClose={() => setOpenUpdateDialog(false)}
@@ -217,17 +210,12 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
           }
         }}
       />
-    <Content>
-      <GithubRepoPreview owner="ocadotechnology-university" repo="IOS" />
-    </Content>
 
-      {/* Render linked entity information */}
       {linkedEntity && (
         <Grid item xs={12}>
           <h3>Linked Entity Information</h3>
           <p>Name: {linkedEntity.name}</p>
           <p>Type: {linkedEntity.type}</p>
-          {/* Add more fields as needed */}
         </Grid>
       )}
     </Grid>
