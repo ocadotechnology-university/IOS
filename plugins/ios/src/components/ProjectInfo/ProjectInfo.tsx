@@ -178,6 +178,8 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
             <PersonIcon fontSize="small" style={{ marginRight: 4 }} />
             <Link
               href={`/catalog/default/user/${selectedProject.project_manager_username}`}
+              target="_blank"
+              rel="noopener"
               className={classes.value}
               display="inline"
             >
@@ -202,6 +204,8 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
             <PeopleIcon fontSize="small" style={{ marginRight: 4 }} />
             <Link
               href={`/catalog/default/group/${selectedProject.project_team_owner_name}`}
+              target="_blank"
+              rel="noopener"
               className={classes.value}
               display="inline"
             >
@@ -252,18 +256,21 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
             <Typography className={classes.value} display="inline">{selectedProject.project_version}</Typography>
           </Box>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Box className={classes.info} display="flex" alignItems="center">
-            <MemoryIcon fontSize="small" style={{ marginRight: 4 }} />
-            <Link
-              href={`/catalog/default/component/${stringifyEntityRef(linkedEntity)}`}
-              className={classes.value}
-              display="inline"
-            >
-              Entity Page
-            </Link>
-          </Box>
-        </Grid>
+
+        {linkedEntity && (
+          <Grid item xs={12} md={6}>
+            <Box className={classes.info} display="flex" alignItems="center">
+              <MemoryIcon fontSize="small" style={{ marginRight: 4 }} />
+              <Link
+                href={`/catalog/default/component/${stringifyEntityRef(linkedEntity)}`}
+                className={classes.value}
+                display="inline"
+              >
+                Entity Page
+              </Link>
+            </Box>
+          </Grid>
+        )}
       </Grid>
 
       {openDeleteDialog && (
