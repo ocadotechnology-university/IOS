@@ -31,3 +31,10 @@ export type Comment = {
     comment_date: string;
     comment_version: string;
 }
+export type Reply = {
+    comment_id: number;
+    user_id_ref: string;
+    comment_text: string;
+    comment_date: string;
+    comment_version: string;
+}

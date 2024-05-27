@@ -118,6 +118,8 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
         .then(project => setSelectedProject(project))
         .catch(error => console.error('Error fetching project:', error));
     }
+    console.log("!!!!!");
+    console.log("!!!!!", selectedProject.entity_ref);
   }, [project, entity_ref]);
 
   const handleEditClick = () => {
@@ -136,6 +138,8 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   useEffect(() => {
     if (selectedProject && selectedProject.project_entity_ref) {
       const parsedEntity = parseEntityRef(selectedProject.project_entity_ref);
+      console.log("!!!!!");
+      console.log("!!!!!", parsedEntity);
       setLinkedEntity(parsedEntity);
     }
   }, [selectedProject]);

@@ -195,6 +195,16 @@ export async function createRouter(
       response.status(500).send('Internal server error');
     }
   });
+  router.get('/projects/id/:project_id', async (request, response) => {
+    const project_id = request.params.project_id;
+    try {
+      const project = await dbHandler.getProjectByID(project_id);
+      response.status(200).json(project);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      response.status(500).send('Internal server error');
+    }
+  });
 
   router.get('/ios_members/:project_id', async (request, response) => {
     const projet_id_str = request.params.project_id;
@@ -263,6 +273,7 @@ export async function createRouter(
     const { 
       user_ref,
       comment_text,
+      comment_id_ref,
     } = request.body;
     
 
@@ -273,6 +284,7 @@ export async function createRouter(
 
       await dbHandler.insertComment(
         project_id_ref,
+        comment_id_ref,
         user_ref,
         comment_text,
         comment_version,
@@ -289,6 +301,18 @@ export async function createRouter(
     const project_id = parseInt(projet_id_str, 10);
     try{ 
       const comments = await dbHandler.getCommentsByProjectID(project_id);
+      response.status(200).json(comments);
+    } catch (error) {
+      console.error('Error getting comments: ', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.get('/projects/replies/:comment_id_ref', async (request, response) => {
+    const comment_id_str = request.params.comment_id_ref;
+    const comment_id_ref = parseInt(comment_id_str, 10);
+    try{ 
+      const comments = await dbHandler.getRepliesByCommentID(comment_id_ref);
       response.status(200).json(comments);
     } catch (error) {
       console.error('Error getting comments: ', error);

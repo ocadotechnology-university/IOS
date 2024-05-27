@@ -230,7 +230,52 @@ export class DatabaseHandler {
       throw error;
     }
   }
-  
+ 
+  async getProjectByID(project_id: number): Promise<{ 
+    project_id: number,
+    entity_ref: string,
+    project_title: string, 
+    project_description: string, 
+    project_manager_username: string,
+    project_manager_ref: string,
+    project_docs_ref: string,
+    project_life_cycle_status: string,
+    project_team_owner_name: string,
+    project_team_owner_ref: string,
+    project_rating: number,
+    project_views: number,
+    project_version: string,
+    project_start_date: Date,
+    project_update_date: Date 
+    project_repository_link: string,
+  }[]> {
+    try {
+      const projects = await this.client('ios-table')
+        .where('project_id', project_id)
+        .select(
+          'project_id',
+          'entity_ref',
+          'project_title', 
+          'project_description', 
+          'project_manager_username', 
+          'project_manager_ref',
+          'project_docs_ref',
+          'project_life_cycle_status',
+          'project_team_owner_name',
+          'project_team_owner_ref',
+          'project_rating',
+          'project_views',
+          'project_version',
+          'project_start_date',
+          'project_update_date',
+          'project_repository_link'
+        );
+      return projects;
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      throw error;
+    }
+  } 
 
   async getProjectVersion(ProjectId: number): Promise<{ 
     project_version: string,
@@ -310,6 +355,7 @@ export class DatabaseHandler {
 
   async insertComment(
     project_id_ref: number,
+    comment_id_ref: number,
     user_id_ref: string,
     comment_text: string,
     comment_version: string,
@@ -320,6 +366,7 @@ export class DatabaseHandler {
       console.log('Inserting comment with data:', {
         project_id_ref,
         user_id_ref,
+        comment_id_ref,
         comment_text,
         comment_date,
         comment_version
@@ -328,6 +375,7 @@ export class DatabaseHandler {
         .insert({ 
           project_id_ref,
           user_id_ref,
+          comment_id_ref,
           comment_text,
           comment_date,
           comment_version,
@@ -342,6 +390,31 @@ export class DatabaseHandler {
   async getCommentsByProjectID(projectId: number): Promise<{ 
     comment_id: number,
     user_id_ref: string,
+    comment_id_ref: number,
+    comment_text: string,
+    comment_date: Date,
+    comment_version: string,
+  }[]> {
+    try {
+      const comments = await this.client('ios-table-comments').select(
+        'comment_id',
+        'user_id_ref',
+        'comment_id_ref',
+        'comment_text',
+        'comment_date',
+        'comment_version',
+      )
+      .where('project_id_ref', projectId);
+      return comments;
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      throw error;
+    }
+  }
+
+  async getRepliesByCommentID(commentId: number): Promise<{ 
+    comment_id: number,
+    user_id_ref: string,
     comment_text: string,
     comment_date: Date,
     comment_version: string,
@@ -354,7 +427,7 @@ export class DatabaseHandler {
         'comment_date',
         'comment_version',
       )
-      .where('project_id_ref', projectId);
+      .where('comment_id_ref', commentId);
       return comments;
     } catch (error) {
       console.error('Error fetching comments:', error);

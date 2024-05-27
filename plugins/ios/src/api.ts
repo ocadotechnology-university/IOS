@@ -47,6 +47,9 @@ export interface IosApi {
   getProjectByRef(
     entity_ref: string,
   ): Promise<Project>
+  getProjectByID(
+    project_id: number,
+  ): Promise<Project>
   getMembers(project_id: number): Promise <Member[]>
   insertMember( 
     project_id: number,
@@ -54,12 +57,16 @@ export interface IosApi {
   ): Promise <void>;
   insertComment(
     project_id_ref: number,
+    comment_id_ref: number,
     user_ref: string,
     comment_text: string,
   ): Promise<void> ;
   getComments(
     project_id_ref: number,
   ): Promise<Comment[]>
+  getReplies(
+    comment_id_ref: number,
+  ): Promise<Reply[]>
   getUserData(
     user_ref: string,
   ): Promise<Member[]>
@@ -166,6 +173,17 @@ export class IosClient implements IosApi {
     .then(res => res.json());
     
   }
+  async getProjectByID(
+    project_id: number,
+  ): Promise<Project> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const encodedEntityRef = encodeURIComponent(project_id);
+    const url = `${baseUrl}/projects/id/${encodedEntityRef}`;
+    return await this.fetchApi
+    .fetch(url)
+    .then(res => res.json());
+    
+  }
 
   async updateProject(
     project_id: number,
@@ -239,6 +257,7 @@ export class IosClient implements IosApi {
   }
   async insertComment(
     project_id_ref: number,
+    comment_id_ref: number,
     user_ref: string,
     comment_text: string,
   ): Promise<void> {
@@ -248,6 +267,7 @@ export class IosClient implements IosApi {
     const payload = {
       user_ref,
       comment_text,
+      comment_id_ref,
     };
 
     const response = await this.fetchApi.fetch(url, {
@@ -275,6 +295,15 @@ export class IosClient implements IosApi {
       .then(res => res.json());
   }
 
+  async getReplies(comment_id_ref: number): Promise<Reply[]> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/replies/${comment_id_ref}`;
+  
+    return await this.fetchApi
+      .fetch(url)
+      .then(res => res.json());
+  }
+
   async getUserData(user_ref: string): Promise<Member[]> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/ios_members/data`;
@@ -285,7 +314,7 @@ export class IosClient implements IosApi {
 
     try {
         const response = await this.fetchApi.fetch(url, {
-            method: 'POST',  // Change to POST method
+            method: 'POST',  
             headers: {
                 'Content-Type': 'application/json'
             },
