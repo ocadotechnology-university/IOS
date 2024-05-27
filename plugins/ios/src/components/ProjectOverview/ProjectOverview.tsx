@@ -13,6 +13,7 @@ type Props = {
   handleCloseDialog: () => void;
   project: any;
   project_id: string;
+  entity_ref: string; // Add entity_ref to Props
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -23,11 +24,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }: Props) => {
+export const ProjectOverview = ({ open, handleCloseDialog, project, project_id, entity_ref }: Props) => {
   const classes = useStyles();
   const [isEditable, setIsEditable] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-
 
   if (!project) {
     return null;
@@ -50,8 +50,6 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
     handleCloseDeleteDialog();
   };
 
-  
-
   return (
     <Dialog
       open={open}
@@ -63,8 +61,14 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
     >
       <DialogTitle>Project Overview</DialogTitle>
       <DialogContent>
-        <ProjectInfo project={project} onDeleteClick={handleDeleteClick} />
-        <GithubRepoPreview repoUrl='https://github.com/THU-MIG/yolov10' />
+       
+        <ProjectInfo
+          project={project}
+          entity_ref={entity_ref} // Pass entity_ref to ProjectInfo
+          onDeleteClick={handleDeleteClick}
+          fetchProjects={() => {}}
+        />
+        <GithubRepoPreview repoUrl={project.project_repository_link} />
         <CommentSection projectId={project.project_id} />
       </DialogContent>
       {openDeleteDialog && (

@@ -69,16 +69,29 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       setGroups(groupEntities.items);
     };
 
-    const fetchCatalogEntities = async () => {
-      const entities = await catalogApi.getEntities({
-        filter: { kind: 'component' }
-      });
-      setCatalogEntities(entities.items);
-    };
-
     fetchUsersAndGroups();
-    fetchCatalogEntities();
   }, [catalogApi]);
+
+  useEffect(() => {
+    if (open) {
+      const fetchCatalogEntities = async () => {
+        const entities = await catalogApi.getEntities({
+          filter: { kind: 'component' }
+        });
+
+        const existingProjects = await iosApi.getProjects();
+        console.log('Existing projects', existingProjects);
+        const existingEntityRefs = new Set(existingProjects.map(proj => proj.entity_ref));
+
+        console.log('Existing Entity Refs:', existingProjects.map(proj => proj.entity_ref));
+
+        const availableEntities = entities.items.filter(entity => !existingEntityRefs.has(stringifyEntityRef(entity)));
+        setCatalogEntities(availableEntities);
+      };
+
+      fetchCatalogEntities();
+    }
+  }, [catalogApi, iosApi, open]);
 
   useEffect(() => {
     console.log('Users:', users);
@@ -94,7 +107,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   };
 
   const hasError = (url) => {
-    return !!(url && !isValidUrl(url)); // Return boolean
+    return !!(url && !isValidUrl(url)); 
   };
 
   const isFormValid = () => {

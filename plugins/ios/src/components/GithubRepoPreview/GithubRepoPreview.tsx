@@ -13,6 +13,7 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { makeStyles } from '@material-ui/core/styles';
 import ReactMarkdown from 'react-markdown';
 import { Table, TableColumn, InfoCard, CodeSnippet } from '@backstage/core-components';
+import { useApi, configApiRef } from '@backstage/core-plugin-api';
 import gfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 
@@ -70,45 +71,44 @@ const parseRepoUrl = (url: string) => {
   return { owner: match[1], repo: match[2] };
 };
 
-// Securely retrieve your GitHub Personal Access Token from environment variables
-const GITHUB_PAT = 'url';
-
-const fetchGithubRepoContents = async (owner: string, repo: string, path: string = '') => {
-  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
-    headers: {
-      Accept: 'application/vnd.github.v3+json',
-      Authorization: `token ${GITHUB_PAT}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`Error fetching repository contents: ${response.statusText}`);
-  }
-  return response.json();
-};
-
-const fetchGithubFileContents = async (owner: string, repo: string, path: string = '') => {
-  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
-    headers: {
-      Accept: 'application/vnd.github.v3.raw',
-      Authorization: `token ${GITHUB_PAT}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`Error fetching file contents: ${response.statusText}`);
-  }
-  return response.text();
-};
-
-const sortContents = (contents: any[]) => {
-  return contents.sort((a, b) => {
-    if (a.type === 'dir' && b.type !== 'dir') return -1;
-    if (a.type !== 'dir' && b.type === 'dir') return 1;
-    return a.name.localeCompare(b.name);
-  });
-};
-
-export const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl }) => {
+const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl }) => {
   const classes = useStyles();
+  const config = useApi(configApiRef);
+  const githubToken = config.getString('integrations.github[0].token');
+
+  const fetchGithubRepoContents = async (owner: string, repo: string, path: string = '') => {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `token ${githubToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Error fetching repository contents: ${response.statusText}`);
+    }
+    return response.json();
+  };
+
+  const fetchGithubFileContents = async (owner: string, repo: string, path: string = '') => {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      headers: {
+        Accept: 'application/vnd.github.v3.raw',
+        Authorization: `token ${githubToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Error fetching file contents: ${response.statusText}`);
+    }
+    return response.text();
+  };
+
+  const sortContents = (contents: any[]) => {
+    return contents.sort((a, b) => {
+      if (a.type === 'dir' && b.type !== 'dir') return -1;
+      if (a.type !== 'dir' && b.type === 'dir') return 1;
+      return a.name.localeCompare(b.name);
+    });
+  };
 
   if (!repoUrl) {
     return <Typography variant="h6">No repository URL provided</Typography>;

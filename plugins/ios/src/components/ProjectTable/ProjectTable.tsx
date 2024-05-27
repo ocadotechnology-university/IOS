@@ -5,16 +5,14 @@ import { useApi, alertApiRef } from '@backstage/core-plugin-api';
 import { iosApiRef } from '../../api';
 import { ProjectOverview } from '../ProjectOverview';
 
-
 export const ProjectTable = () => {
   const [projects, setProjects] = useState([]);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
-
+  const [selectedProjectRef, setSelectedProjectRef] = useState(null);
   const [openProjectOverview, setOpenProjectOverview] = useState(false);
-
 
   const fetchProjects = async () => {
     try {
@@ -35,9 +33,10 @@ export const ProjectTable = () => {
     }
   }, [openProjectOverview]);
 
-  const handleViewProject = (project, project_id) => {
+  const handleViewProject = (project, project_id, entity_ref) => {
     setSelectedProject(project);
     setSelectedProjectId(project_id); 
+    setSelectedProjectRef(entity_ref); 
     setOpenProjectOverview(true);
   };
 
@@ -54,7 +53,7 @@ export const ProjectTable = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleViewProject(rowData, rowData.project_id)}
+            onClick={() => handleViewProject(rowData, rowData.project_id, rowData.entity_ref)}
           >
             View Project
           </Button>
@@ -74,7 +73,8 @@ export const ProjectTable = () => {
         open={openProjectOverview}
         handleCloseDialog={() => setOpenProjectOverview(false)}
         project={selectedProject}
-        project_id={selectedProjectId} 
+        project_id={selectedProjectId}
+        entity_ref={selectedProjectRef} // Pass entity_ref to ProjectOverview
       />
     </>
   );

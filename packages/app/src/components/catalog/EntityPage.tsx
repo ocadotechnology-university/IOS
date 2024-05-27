@@ -140,7 +140,7 @@ const entityWarningContent = (
 
 const useStyles = makeStyles((theme) => ({
   cardContent: {
-    maxHeight: 400, // Adjust as needed
+    maxHeight: 400, 
     overflowY: 'auto',
   },
   card: {
@@ -148,16 +148,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const ProjectsGridItem = () => {
-  const classes = useStyles();
+  
 
   return (
     <Grid item md={12} xs={12}>
-      <Card>
-        <CardHeader title="Projects" />
-        <CardContent className={classes.cardContent}>
-          <Projects variant="gridItem" height={400} />
-        </CardContent>
-      </Card>
+      <EntityOverviewCard project_id="some_project_id" flag={true} />  
     </Grid>
   );
 };

@@ -12,9 +12,10 @@ import { GithubRepoPreview } from '../GithubRepoPreview';
 
 type Props = {
   project_id: string;
+  flag?: boolean; // Optional flag prop
 };
 
-export const EntityOverviewCard = ({ project_id }: Props) => {
+export const EntityOverviewCard = ({ project_id, flag }: Props) => {
   const iosApi = useApi(iosApiRef);
   const { entity } = useEntity();
   const [project, setProject] = useState<any>(null);
@@ -52,32 +53,39 @@ export const EntityOverviewCard = ({ project_id }: Props) => {
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
   };
+
   const handleDeleteConfirmed = async () => {
     setOpenDeleteDialog(false);
     try {
       await iosApi.deleteProject(project_id);
-      
-      
     } catch (error) {
       console.error('Error deleting project:', error);
-    } finally{
+    } finally {
       fetchProjectData();
     }
   };
-  
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {project && (
         <>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <Paper style={{ flex: '1 1 45%', minWidth: '300px', padding: '16px' }}>
-              <ProjectInfo project={project} onDeleteClick={handleDeleteClick} fetchProjects={fetchProjectData} />
-            </Paper>
+            <ProjectInfo project={project} onDeleteClick={handleDeleteClick} fetchProjects={fetchProjectData} />
           </div>
-          <Paper style={{ flex: '1 1 100%', minWidth: '300px', padding: '16px' }}>
-            <CommentSection projectId={project.project_id} />
-          </Paper>
+          {!flag ? (
+            // Render this part if flag is false or not provided
+            <>
+              <Paper style={{ flex: '1 1 100%', minWidth: '300px', padding: '16px' }}>
+                <GithubRepoPreview repoUrl={project.project_repository_link} />
+              </Paper>
+              <Paper style={{ flex: '1 1 100%', minWidth: '300px', padding: '16px' }}>
+                <CommentSection projectId={project.project_id} />
+              </Paper>
+            </>
+          ) : (
+            // Render this part if flag is true
+            <></>
+          )}
         </>
       )}
       {openDeleteDialog && (
