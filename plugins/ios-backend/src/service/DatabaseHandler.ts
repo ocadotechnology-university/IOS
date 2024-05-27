@@ -40,6 +40,7 @@ export class DatabaseHandler {
     project_rating: number,
     project_views: number,
     project_version: string,
+    project_repository_link: string,
   ): Promise<number> {
     try {
       const date = new Date();
@@ -58,6 +59,7 @@ export class DatabaseHandler {
         project_rating,
         project_views,
         project_version,
+        project_repository_link,
         project_start_date: preciseStartDate, 
         project_update_date: preciseStartDate,
       }).returning('project_id'); // Return the auto-generated project_id
@@ -116,6 +118,7 @@ export class DatabaseHandler {
       project_team_owner_ref: string,
       project_version: string,
       project_update_date: Date
+      project_repository_link: string
     }>
   ): Promise<void> {
     try {
@@ -153,7 +156,8 @@ export class DatabaseHandler {
     project_views: number,
     project_version: string,
     project_start_date: Date,
-    project_update_date: Date 
+    project_update_date: Date
+    project_repository_link: string, 
   }[]> {
     try {
       const projects = await this.client('ios-table').select(
@@ -172,6 +176,7 @@ export class DatabaseHandler {
         'project_version',
         'project_start_date',
         'project_update_date',
+        'project_repository_link',
       );
       return projects;
     } catch (error) {
@@ -196,6 +201,7 @@ export class DatabaseHandler {
     project_version: string,
     project_start_date: Date,
     project_update_date: Date 
+    project_repository_link: string,
   }[]> {
     try {
       const projects = await this.client('ios-table')
@@ -216,6 +222,7 @@ export class DatabaseHandler {
           'project_version',
           'project_start_date',
           'project_update_date',
+          'project_repository_link',
         );
       return projects;
     } catch (error) {

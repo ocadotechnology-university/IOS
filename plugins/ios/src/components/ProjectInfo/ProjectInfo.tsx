@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, TextField, IconButton } from '@material-ui/core';
+import { Grid, IconButton, Typography, Paper, Box, Link } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import { Content } from '@backstage/core-components';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ProjectDeleteDialog } from '../ProjectDeleteDialog';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
@@ -10,8 +9,90 @@ import { iosApiRef } from '../../api';
 import { alertApiRef } from '@backstage/core-plugin-api';
 import { TimeSinceUpdate } from '../DateTime';
 import { TimeToDate } from "../DateTime";
-import { GithubRepoPreview } from "../GithubRepoPreview";
-import { parseEntityRef } from '@backstage/catalog-model';
+import EmailIcon from '@material-ui/icons/Email';
+import GitHubIcon from '@material-ui/icons/GitHub';
+import DescriptionIcon from '@material-ui/icons/Description';
+import { parseEntityRef, stringifyEntityRef } from '@backstage/catalog-model';
+import { StatusIndicator } from '../StatusIndicator';
+import { makeStyles } from '@material-ui/core/styles';
+import PersonIcon from '@material-ui/icons/Person';
+import PeopleIcon from '@material-ui/icons/People';
+import MemoryIcon from '@material-ui/icons/Memory';
+
+const useStyles = makeStyles((theme) => ({
+  iconLink: {
+    textDecoration: 'none',
+    color: theme.palette.primary.main,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    borderRadius: '4px',
+    padding: '4px',
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
+  icon: {
+    fontSize: '25px',
+    color: theme.palette.primary.main,
+  },
+  iconText: {
+    textDecoration: 'none',
+    marginTop: '4px',
+    color: theme.palette.primary.main,
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+  },
+  gridContainer: {
+    flexWrap: 'wrap',
+    gap: theme.spacing(2),
+  },
+  paper: {
+    padding: theme.spacing(3),
+    marginBottom: theme.spacing(3),
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[3],
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing(2),
+  },
+  section: {
+    marginBottom: theme.spacing(2),
+    fontSize: '16px',
+  },
+  info: {
+    marginBottom: theme.spacing(1),
+  },
+  label: {
+    fontWeight: 'bold',
+    marginRight: theme.spacing(1),
+  },
+  value: {
+    fontWeight: 'normal',
+  },
+  iconButtons: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  iconButtonSpacing: {
+    marginRight: theme.spacing(1),
+  },
+  entityLink: {
+    display: 'flex',
+    alignItems: 'center',
+    color: theme.palette.primary.main,
+    textDecoration: 'none',
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
+}));
 
 type ProjectInfoProps = {
   project?: any;
@@ -27,6 +108,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   const [linkedEntity, setLinkedEntity] = useState(null);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
+  const classes = useStyles();
 
   useEffect(() => {
     if (project) {
@@ -59,113 +141,129 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   }, [selectedProject]);
 
   return (
-    <Grid container spacing={2}>
-      <Grid container justifyContent='space-between' alignItems='center'>
-        <Grid item xs={6}>
-          <h1 style={{ fontSize: "30px", margin: "0" }}>Project: {selectedProject.project_title}</h1>
-        </Grid>
-        <Grid item xs={3} container justifyContent='flex-end'>
-          <IconButton size='medium' onClick={handleEditClick} style={{ marginLeft: "8px" }}>
+    <Paper className={classes.paper}>
+      <Box className={classes.header}>
+        <Typography variant="h3">{selectedProject.project_title}</Typography>
+        <Box className={classes.iconButtons}>
+          <IconButton size="small" onClick={handleEditClick} className={classes.iconButtonSpacing}>
             <EditIcon />
           </IconButton>
-          <IconButton size='medium' onClick={handleDeleteClick} style={{ marginLeft: "8px" }}>
+          <IconButton size="small" onClick={handleDeleteClick}>
             <DeleteIcon />
           </IconButton>
+        </Box>
+      </Box>
+      <StatusIndicator project={project} />
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Typography variant="body1" className={classes.section}>
+            {selectedProject.project_description}
+          </Typography>
         </Grid>
-      </Grid>
-
-      <Grid item xs={2} md={12}>
-        <h4 style={{ color: 'rgba(209, 205, 205, 1)' }}>{selectedProject.project_description}</h4>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Last Updated"
-          value={TimeSinceUpdate({ updateDate: selectedProject.project_update_date })}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Initialization Date"
-          value={TimeToDate({ startDate: selectedProject.project_start_date })}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Description"
-          value={selectedProject.project_description}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Life Cycle Status"
-          value={selectedProject.project_life_cycle_status}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Manager"
-          value={selectedProject.project_manager_username}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Manager Reference"
-          value={selectedProject.project_manager_ref}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Team Owner"
-          value={selectedProject.project_team_owner_name}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Team Owner Reference"
-          value={selectedProject.project_team_owner_ref}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Docs Reference"
-          value={selectedProject.project_docs_ref}
-          margin="normal"
-          fullWidth
-          disabled
-        />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <TextField
-          label="Project Version"
-          value={selectedProject.project_version}
-          margin="normal"
-          fullWidth
-          disabled
-        />
+        <Grid item xs={12} md={2}>
+          <Box className={classes.info}>
+            <Typography className={classes.label} display="inline">Last Updated:</Typography>
+            <Typography className={classes.value} display="inline">{TimeSinceUpdate({ updateDate: selectedProject.project_update_date })}</Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={5}>
+          <Box className={classes.info}>
+            <Typography className={classes.label} display="inline">Project Initialization Date:</Typography>
+            <Typography className={classes.value} display="inline">{TimeToDate({ startDate: selectedProject.project_start_date })}</Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Box className={classes.info} display="flex" alignItems="center">
+            <Typography className={classes.label} display="inline">Project Manager Username:</Typography>
+            <PersonIcon fontSize="small" style={{ marginRight: 4 }} />
+            <Link
+              href={`/catalog/default/user/${selectedProject.project_manager_username}`}
+              className={classes.value}
+              display="inline"
+            >
+              {selectedProject.project_manager_username}
+            </Link>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <a
+            href={selectedProject.project_manager_ref}
+            className={classes.iconLink}
+          >
+            <EmailIcon className={classes.icon} />
+            <Typography variant="body1" className={classes.iconText}>
+              Project Manager
+            </Typography>
+          </a>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Box className={classes.info} display="flex" alignItems="center">
+            <Typography className={classes.label} display="inline">Team Owner Name:</Typography>
+            <PeopleIcon fontSize="small" style={{ marginRight: 4 }} />
+            <Link
+              href={`/catalog/default/group/${selectedProject.project_team_owner_name}`}
+              className={classes.value}
+              display="inline"
+            >
+              {selectedProject.project_team_owner_name}
+            </Link>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <a
+            href={selectedProject.project_team_owner_ref}
+            className={classes.iconLink}
+          >
+            <EmailIcon className={classes.icon} />
+            <Typography variant="body1" className={classes.iconText}>
+              Team Owner
+            </Typography>
+          </a>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <a
+            href={selectedProject.project_docs_ref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classes.iconLink}
+          >
+            <DescriptionIcon className={classes.icon} />
+            <Typography variant="body1" className={classes.iconText}>
+              Project Docs
+            </Typography>
+          </a>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <a
+            href={selectedProject.project_repository_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classes.iconLink}
+          >
+            <GitHubIcon className={classes.icon} />
+            <Typography variant="body1" className={classes.iconText}>
+              GitHub repository
+            </Typography>
+          </a>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Box className={classes.info}>
+            <Typography className={classes.label} display="inline">Project Version:</Typography>
+            <Typography className={classes.value} display="inline">{selectedProject.project_version}</Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Box className={classes.info} display="flex" alignItems="center">
+            <MemoryIcon fontSize="small" style={{ marginRight: 4 }} />
+            <Link
+              href={`/catalog/default/component/${stringifyEntityRef(linkedEntity)}`}
+              className={classes.value}
+              display="inline"
+            >
+              Entity Page
+            </Link>
+          </Box>
+        </Grid>
       </Grid>
 
       {openDeleteDialog && (
@@ -210,14 +308,6 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
           }
         }}
       />
-
-      {linkedEntity && (
-        <Grid item xs={12}>
-          <h3>Linked Entity Information</h3>
-          <p>Name: {linkedEntity.name}</p>
-          <p>Type: {linkedEntity.type}</p>
-        </Grid>
-      )}
-    </Grid>
+    </Paper>
   );
 };

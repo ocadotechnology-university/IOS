@@ -43,6 +43,7 @@ export async function createRouter(
       project_rating,
       project_views,
       project_version,
+      project_repository_link,
     } = request.body;
     
     try {
@@ -59,6 +60,7 @@ export async function createRouter(
         project_rating,
         project_views,
         project_version,
+        project_repository_link,
       );
   
       // Respond with the project_id
@@ -83,6 +85,7 @@ export async function createRouter(
       project_team_owner_name,
       project_team_owner_ref,
       project_version,
+      project_repository_link,
     } = request.body;
   
     const date = new Date();
@@ -99,6 +102,7 @@ export async function createRouter(
       project_team_owner_ref?: string,
       project_version?: string,
       project_update_date?: string 
+      project_repository_link?: string
     } = {};
     console.log("!!!!!", updates);
     if (project_title){
@@ -137,6 +141,9 @@ export async function createRouter(
       updates.project_version = project_version;
     }
 
+    if (project_repository_link){
+      updates.project_repository_link = project_repository_link;
+    }
 
     updates.project_update_date = project_update_date;
 

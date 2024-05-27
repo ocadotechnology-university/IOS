@@ -22,6 +22,7 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
   const [project_team_owner_name, setProjectTeamOwnerName] = useState('');
   const [project_team_owner_ref, setProjectTeamOwnerRef] = useState('');
   const [project_version, setProjectVersion] = useState('');
+  const [project_repository_link, setProjectRepositoryLink] = useState('');
 
   const [isValidForm, setIsValidForm] = useState(false);
 
@@ -37,9 +38,10 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
       setProjectLifeCycleStatus(project.project_life_cycle_status || '');
       setProjectTeamOwnerName(project.project_team_owner_name || '');
       setProjectTeamOwnerRef(project.project_team_owner_ref || '');
-      setProjectVersion(project.project_version || ''); 
+      setProjectVersion(project.project_version || '');
+      setProjectRepositoryLink(project.project_repository_link || '');
     }
-  }, [project]); 
+  }, [project]);
 
   useEffect(() => {
     setIsValidForm(
@@ -50,12 +52,25 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
       project_team_owner_name !== '' &&
       project_manager_ref !== '' &&
       project_docs_ref !== '' &&
-      project_version !== '' && 
+      project_version !== '' &&
+      project_repository_link !== '' &&
       (!project_manager_ref || isValidUrl(project_manager_ref)) &&
       (!project_docs_ref || isValidUrl(project_docs_ref)) &&
-      isValidUrl(project_team_owner_ref)
+      isValidUrl(project_team_owner_ref) &&
+      isValidUrl(project_repository_link)
     );
-  }, [project_title, project_description, project_manager_username, project_life_cycle_status, project_team_owner_name, project_manager_ref, project_docs_ref, project_team_owner_ref, project_version]);
+  }, [
+    project_title,
+    project_description,
+    project_manager_username,
+    project_life_cycle_status,
+    project_team_owner_name,
+    project_manager_ref,
+    project_docs_ref,
+    project_team_owner_ref,
+    project_version,
+    project_repository_link,
+  ]);
 
   const isValidUrl = (url) => {
     const urlPattern = /^https?:\/\/.*$/;
@@ -69,19 +84,20 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
     }
 
     const updatedData = {
-      project_title, 
-      project_description, 
+      project_title,
+      project_description,
       project_manager_username,
       project_manager_ref,
       project_docs_ref,
       project_life_cycle_status,
       project_team_owner_name,
       project_team_owner_ref,
-      project_version, 
+      project_version,
+      project_repository_link,
     };
-  
-    onSubmit(updatedData); 
-    onClose(); 
+
+    onSubmit(updatedData);
+    onClose();
   };
 
   return (
@@ -91,7 +107,7 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
         <TextField
           label="Project Title"
           value={project_title}
-          onChange={(e) => setProjectTitle(e.target.value)}          
+          onChange={(e) => setProjectTitle(e.target.value)}
           margin="normal"
           required
         />
@@ -180,6 +196,21 @@ export const UpdateProjectDialog = ({ open, onClose, project, onSubmit }) => {
           rows={2}
           margin="normal"
           required
+        />
+        <TextField
+          label="Repository Link"
+          value={project_repository_link}
+          onChange={(e) => setProjectRepositoryLink(e.target.value)}
+          multiline
+          rows={2}
+          margin="normal"
+          required
+          error={project_repository_link && !isValidUrl(project_repository_link)}
+          helperText={
+            project_repository_link && !isValidUrl(project_repository_link)
+              ? 'Not a valid URL'
+              : ''
+          }
         />
       </DialogContent>
       <DialogActions>

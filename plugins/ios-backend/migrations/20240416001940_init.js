@@ -14,6 +14,7 @@ exports.up = async function up(knex) {
         table.string('project_life_cycle_status').notNullable().comment("Life cycle of a project");
         table.string('project_team_owner_ref').notNullable().comment("Reference to a team that owns a project");
         table.string('project_team_owner_name').notNullable().comment("Name of a team that owns");
+        table.string('project_repository_link').notNullable().comment("Link on a repository on github");
         table.integer('project_rating').notNullable().comment("Number of starts project has");
         table.integer('project_views').notNullable().comment("Number of views project has");
         table.timestamp('project_start_date').notNullable().comment("Date and time of start of a project");

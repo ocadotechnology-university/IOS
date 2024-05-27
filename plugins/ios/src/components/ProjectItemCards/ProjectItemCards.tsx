@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -6,6 +6,9 @@ import {
   CardMedia,
   Button,
   CardActions,
+  Tab,
+  Table,
+  TablePagination,
 } from '@material-ui/core';
 import { ItemCardGrid, ItemCardHeader } from '@backstage/core-components';
 import { useApi, alertApiRef, identityApiRef } from '@backstage/core-plugin-api';
@@ -13,6 +16,7 @@ import { iosApiRef } from '../../api';
 import { makeStyles } from '@material-ui/core/styles';
 import { UpdateProjectDialog } from '../UpdateProjectDialog';
 import { ProjectOverview } from '../ProjectOverview';
+import SearchBar from 'material-ui-search-bar';
 
 const useStyles = makeStyles({
   grid: {
@@ -34,11 +38,29 @@ const useStyles = makeStyles({
     textAlign: 'center',
     padding: '20px',
   },
+  search: {
+    marginBottom: '20px',
+    width: '315px',
+  },
+  searchContainer: {
+    marginBottom: '20px',
+    display: 'flex',
+    justifyContent: 'flex-start',
+  },
+  pagination: {
+    marginTop: '1rem',
+    marginLeft: 'auto',
+    marginRight: '0',
+  },
 });
 
 export const Projects = () => {
   const classes = useStyles();
   const [projects, setProjects] = useState([]);
+  const [searchValue, setSearchValue] = useState('');
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -49,6 +71,7 @@ export const Projects = () => {
     try {
       const projectData = await iosApi.getProjects();
       setProjects(projectData);
+      setFilteredProjects(projectData);
     } catch (error) {
       console.error('Error fetching projects:', error);
     }
@@ -64,6 +87,14 @@ export const Projects = () => {
     }
   }, [openProjectOverview]);
 
+  useEffect(() => {
+    setPage(0);
+    const filtered = projects.filter((project) =>
+        project.project_title.toLowerCase().includes(searchValue.toLowerCase())
+    );
+    setFilteredProjects(filtered);
+  },[searchValue, projects]);
+
   const handleViewProject = (project) => {
     setSelectedProject(project);
     setSelectedProjectId(project.project_id);
@@ -71,37 +102,71 @@ export const Projects = () => {
 
   };
 
+  const handlePageChange = (_: any, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedProjects = filteredProjects.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
   return (
     <>
-      {projects.length > 0 ? (
-        <ItemCardGrid className={classes.grid}>
-          {projects.map((project) => (
-            <div
-              key={project.project_title}
-              className={classes.card}
-              onClick={() => handleViewProject(project)}
-            >
-              <Card>
-                <CardMedia>
-                  <ItemCardHeader
-                    title={project.project_title}
-                    subtitle={project.project_manager_username}
-                  />
-                </CardMedia>
-                <CardContent>
-                  <Typography variant="body2" className={classes.description}>
-                    {project.project_description}
-                  </Typography>
-                </CardContent>
-                <CardContent>
-                  <Typography variant="body2">
-                    {project.project_team_owner_name}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </div>
-          ))}
+      <div className={classes.searchContainer}>
+        <SearchBar
+          className={classes.search}
+          value={searchValue}
+          onChange={(newValue) => setSearchValue(newValue)}
+          onCancelSearch={() => setSearchValue('')}
+        />
+      </div>
+      {paginatedProjects.length > 0 ? (
+        <>  
+          <ItemCardGrid className={classes.grid}>
+            {paginatedProjects.map((project) => (
+              <div
+                key={project.project_title}
+                className={classes.card}
+                onClick={() => handleViewProject(project)}
+              >
+                <Card>
+                  <CardMedia>
+                    <ItemCardHeader
+                      title={project.project_title}
+                      subtitle={project.project_manager_username}
+                    />
+                  </CardMedia>
+                  <CardContent>
+                    <Typography variant="body2" className={classes.description}>
+                      {project.project_description}
+                    </Typography>
+                  </CardContent>
+                  <CardContent>
+                    <Typography variant="body2">
+                      {project.project_team_owner_name}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
         </ItemCardGrid>
+        <TablePagination
+          component="div"
+          className={classes.pagination}
+          rowsPerPageOptions={[ 10, 15, 20, 30]}
+          count={filteredProjects.length}
+          page={page}
+          onPageChange={handlePageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
+        </>    
       ) : (
         <div className={classes.noRecords}>
           <Typography variant="body2">No records to display</Typography>

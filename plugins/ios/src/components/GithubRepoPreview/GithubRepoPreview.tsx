@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { CircularProgress, Typography, IconButton, Paper, Tooltip } from '@material-ui/core';
+import {
+  CircularProgress,
+  Typography,
+  IconButton,
+  Paper,
+  Tooltip,
+} from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import FolderIcon from '@material-ui/icons/Folder';
@@ -52,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
   repoOverview: {
     marginTop: theme.spacing(3),
   },
+  backButton: {
+    marginBottom: theme.spacing(2),
+  },
 }));
 
 const parseRepoUrl = (url: string) => {
@@ -62,7 +71,7 @@ const parseRepoUrl = (url: string) => {
 };
 
 // Securely retrieve your GitHub Personal Access Token from environment variables
-const GITHUB_PAT = 'here  url';
+const GITHUB_PAT = 'url';
 
 const fetchGithubRepoContents = async (owner: string, repo: string, path: string = '') => {
   const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
@@ -120,6 +129,7 @@ export const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl })
   const [contents, setContents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [fileContent, setFileContent] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [isFile, setIsFile] = useState(false);
   const [markdownContent, setMarkdownContent] = useState<string | null>(null);
 
@@ -144,6 +154,7 @@ export const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl })
         } else {
           const fileData = await fetchGithubFileContents(owner, repo, path);
           setFileContent(fileData);
+          setFileName(path.split('/').pop() || '');
           setIsFile(true);
         }
       } catch (error) {
@@ -164,6 +175,7 @@ export const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl })
         setLoading(true);
         const fileData = await fetchGithubFileContents(owner, repo, item.path);
         setFileContent(fileData);
+        setFileName(item.name);
         setIsFile(true);
       } catch (error) {
         console.error('Error fetching file contents:', error);
@@ -187,9 +199,7 @@ export const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl })
     {
       title: '',
       field: 'icon',
-      render: (rowData) => (
-        rowData.type === 'dir' ? <FolderIcon /> : <InsertDriveFileIcon />
-      ),
+      render: (rowData) => (rowData.type === 'dir' ? <FolderIcon /> : <InsertDriveFileIcon />),
     },
     { title: 'Name', field: 'name' },
     { title: 'Type', field: 'type' },
@@ -199,13 +209,11 @@ export const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl })
     return <CircularProgress />;
   }
 
-  const fileName = path.split('/').pop();
-
   return (
     <>
       <Typography variant="h4" className={classes.repoOverview}>Repository Overview</Typography>
-      {path && (
-        <IconButton onClick={handleBackClick}>
+      {(path || isFile) && (
+        <IconButton className={classes.backButton} onClick={handleBackClick}>
           <ArrowBackIcon />
         </IconButton>
       )}
@@ -224,7 +232,6 @@ export const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl })
       )}
       {isFile ? (
         <div className={classes.codeContainer}>
-          <Typography variant="h4">File: {fileName}</Typography>
           <Tooltip title="Copy to clipboard">
             <IconButton className={classes.copyButton} onClick={() => handleCopy(fileContent || '')}>
               <FileCopyIcon />

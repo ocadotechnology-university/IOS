@@ -20,6 +20,7 @@ export interface IosApi {
     project_views: number,
     project_rating: number,
     project_version: string,
+    project_repository_link: string,
     ) : Promise<void>;
 
   deleteProject(project_id: number): Promise<void>;
@@ -36,6 +37,7 @@ export interface IosApi {
     project_team_owner_name: string,
     project_team_owner_ref: string,
     project_version: string,
+    project_repository_link: string,
     ) : Promise<void>;
 
   getProjects(
@@ -91,6 +93,7 @@ export class IosClient implements IosApi {
     project_rating: number,
     project_views: number,
     project_version: string,
+    project_repository_link: string,
   ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/projects/`;
@@ -108,6 +111,7 @@ export class IosClient implements IosApi {
       project_rating,
       project_views,
       project_version,
+      project_repository_link,
     };
   
     const response = await this.fetchApi.fetch(url, {
@@ -174,6 +178,7 @@ export class IosClient implements IosApi {
     project_team_owner_name?: string,
     project_team_owner_ref?: string,
     project_version?: string,
+    project_repository_link?: string,
     ): Promise<void> {
     const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
     const url = `${baseUrl}/projects/${project_id}`;
@@ -187,6 +192,7 @@ export class IosClient implements IosApi {
       project_team_owner_name,
       project_team_owner_ref,
       project_version,
+      project_repository_link,
     };
     
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!", payload);

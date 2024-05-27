@@ -63,7 +63,6 @@ export const ProjectOverview = ({ open, handleCloseDialog, project, project_id }
     >
       <DialogTitle>Project Overview</DialogTitle>
       <DialogContent>
-        <StatusIndicator project={project} />
         <ProjectInfo project={project} onDeleteClick={handleDeleteClick} />
         <GithubRepoPreview repoUrl='https://github.com/THU-MIG/yolov10' />
         <CommentSection projectId={project.project_id} />

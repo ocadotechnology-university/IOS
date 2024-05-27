@@ -5,11 +5,12 @@ const useStyles = makeStyles((theme) => ({
   statusIndicator: {
     display: 'flex',
     alignItems: 'center',
+    fontSize: '15px',
     marginBottom: theme.spacing(2), // Ensure there is some margin
   },
   statusCircle: {
-    width: 10,
-    height: 10,
+    width: 13,
+    height: 13,
     borderRadius: '50%',
     marginRight: theme.spacing(1),
   },

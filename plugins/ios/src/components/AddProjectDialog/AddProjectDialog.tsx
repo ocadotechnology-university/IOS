@@ -43,13 +43,13 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const [project_team_owner_name, setProjectTeamOwnerName] = useState('');
   const [project_team_owner_ref, setProjectTeamOwnerRef] = useState('');
   const [project_version, setProjectVersion] = useState('');
-
+  const [project_repository_link, setProjectRepositoryLink] = useState('');
   const project_rating = 0;
   const project_views = 0;
 
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [catalogEntities, setCatalogEntities] = useState([]); 
+  const [catalogEntities, setCatalogEntities] = useState([]);
   const catalogApi = useApi(catalogApiRef);
   const iosApi = useApi(iosApiRef);
 
@@ -61,6 +61,9 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       const groupEntities = await catalogApi.getEntities({
         filter: { kind: 'group' },
       });
+
+      console.log('Fetched Users:', userEntities.items);
+      console.log('Fetched Groups:', groupEntities.items);
 
       setUsers(userEntities.items);
       setGroups(groupEntities.items);
@@ -76,6 +79,10 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
     fetchUsersAndGroups();
     fetchCatalogEntities();
   }, [catalogApi]);
+
+  useEffect(() => {
+    console.log('Users:', users);
+  }, [users]);
 
   useEffect(() => {
     console.log('Selected entity reference:', entity_ref);
@@ -97,7 +104,8 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       project_manager_username &&
       project_team_owner_name &&
       project_life_cycle_status &&
-      entity_ref &&  // Ensure entity_ref is included in the validation
+      entity_ref &&  
+      project_repository_link &&
       (!project_manager_ref || isValidUrl(project_manager_ref)) &&
       (!project_docs_ref || isValidUrl(project_docs_ref)) &&
       isValidUrl(project_team_owner_ref)
@@ -109,7 +117,7 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
       console.error('Invalid form data');
       return;
     }
-  
+
     try {
       console.log("HELLO, HELLO", entity_ref);
       const projectIdResponse = await iosApi.insertProject(
@@ -124,23 +132,26 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
         project_team_owner_ref,
         project_rating,
         project_views,
-        project_version
+        project_version,
+        project_repository_link,
       );
-  
+
       const projectId = projectIdResponse.project_id.project_id;
-  
+
       if (!projectId) {
         console.error('Failed to retrieve project ID');
         return;
       }
-  
+
       const userReferences = users.map(user => stringifyEntityRef(user)).join(', ');
-  
+      const groupReferences = groups.map(group => stringifyEntityRef(group)).join(', ');
+
       await iosApi.insertMember(
         projectId,
         userReferences,
+        groupReferences,
       );
-  
+
     } catch (error) {
       console.error('Error adding project:', error);
     }
@@ -204,6 +215,16 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           helperText={hasError(project_manager_ref) ? 'Not a valid URL' : ''}
         />
         <TextField
+          label="GitHub Repo Link"
+          value={project_repository_link}
+          onChange={(e) => setProjectRepositoryLink(e.target.value)}
+          multiline
+          rows={2}
+          margin="normal"
+          error={hasError(project_repository_link)} 
+          helperText={hasError(project_repository_link) ? 'Not a valid URL' : ''}
+        />
+        <TextField
           label="Docs Link"
           value={project_docs_ref}
           onChange={(e) => setProjectDocsRef(e.target.value)}
@@ -213,13 +234,19 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           error={hasError(project_docs_ref)} 
           helperText={hasError(project_docs_ref) ? 'Not a valid URL' : ''}
         />
-        <TextField
-          label="Project Team Owner Name"
-          value={project_team_owner_name}
-          onChange={(e) => setProjectTeamOwnerName(e.target.value)}
-          margin="normal"
-          required
-        />
+        <FormControl fullWidth margin="normal" required>
+          <InputLabel>Project Team Owner Name</InputLabel>
+          <Select
+            value={project_team_owner_name}
+            onChange={(e) => setProjectTeamOwnerName(e.target.value)}
+          >
+            {groups.map((group) => (
+              <MenuItem key={group.metadata.uid} value={group.metadata.name}>
+                {group.metadata.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <TextField
           label="Team Owner Link"
           value={project_team_owner_ref}
