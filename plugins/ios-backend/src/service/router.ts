@@ -16,7 +16,7 @@ export interface RouterOptions {
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, database, identity } = options;
+  const { logger, database, identity, config } = options;
   const dbHandler = await DatabaseHandler.create({ database });
 
   logger.info('Initializing IOS backend');
@@ -27,6 +27,22 @@ export async function createRouter(
   router.get('/health', (_, response) => {
     logger.info('PONG!');
     response.json({ status: 'ok' });
+  });
+
+  router.get('/config', (request, response) => {
+    logger.info("Request to read config");
+    try {
+      const configData = config.getOptional('integrations.github');
+      if (configData && configData.length > 0) {
+        const token = configData[0].token;
+        response.send(token);  
+      } else {
+        response.status(404).send('GitHub token not found');
+      }
+    } catch (error) {
+      logger.error('Error reading config:', error);
+      response.status(500).send('Internal server error');
+    }
   });
 
   router.post('/projects', async (request, response) => {

@@ -7,6 +7,7 @@ export default async function createPlugin(
 ): Promise<Router> {
   return await createRouter({
     logger: env.logger,
+    identity: env.identity,
     config: env.config,
     database: env.database,
   });

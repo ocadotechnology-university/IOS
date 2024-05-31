@@ -13,13 +13,10 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { makeStyles } from '@material-ui/core/styles';
 import ReactMarkdown from 'react-markdown';
 import { Table, TableColumn, InfoCard, CodeSnippet } from '@backstage/core-components';
-import { useApi, configApiRef } from '@backstage/core-plugin-api';
+import { useApi } from '@backstage/core-plugin-api';
 import gfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-
-type GithubRepoPreviewProps = {
-  repoUrl: string;
-};
+import { iosApiRef } from '../../api';
 
 const useStyles = makeStyles((theme) => ({
   tableContainer: {
@@ -64,58 +61,28 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const parseRepoUrl = (url: string) => {
+const parseRepoUrl = (url) => {
   if (!url) throw new Error('URL is undefined');
   const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)(?:\/|$)/);
   if (!match) throw new Error('Invalid GitHub URL');
   return { owner: match[1], repo: match[2] };
 };
 
-const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl }) => {
+export const GithubRepoPreview = ({ repoUrl }) => {
   const classes = useStyles();
-  const config = useApi(configApiRef);
-  const githubToken = config.getString('integrations.github[0].token');
+  const iosApi = useApi(iosApiRef);
 
-  const fetchGithubRepoContents = async (owner: string, repo: string, path: string = '') => {
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-        Authorization: `token ${githubToken}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Error fetching repository contents: ${response.statusText}`);
-    }
-    return response.json();
-  };
+  const [githubToken, setGithubToken] = useState(null);
+  const [path, setPath] = useState('');
+  const [contents, setContents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fileContent, setFileContent] = useState(null);
+  const [fileName, setFileName] = useState(null);
+  const [isFile, setIsFile] = useState(false);
+  const [markdownContent, setMarkdownContent] = useState(null);
 
-  const fetchGithubFileContents = async (owner: string, repo: string, path: string = '') => {
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
-      headers: {
-        Accept: 'application/vnd.github.v3.raw',
-        Authorization: `token ${githubToken}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Error fetching file contents: ${response.statusText}`);
-    }
-    return response.text();
-  };
-
-  const sortContents = (contents: any[]) => {
-    return contents.sort((a, b) => {
-      if (a.type === 'dir' && b.type !== 'dir') return -1;
-      if (a.type !== 'dir' && b.type === 'dir') return 1;
-      return a.name.localeCompare(b.name);
-    });
-  };
-
-  if (!repoUrl) {
-    return <Typography variant="h6">No repository URL provided</Typography>;
-  }
-
-  let owner: string;
-  let repo: string;
+  let owner;
+  let repo;
 
   try {
     const parsedUrl = parseRepoUrl(repoUrl);
@@ -125,15 +92,23 @@ const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl }) => {
     return <Typography variant="h6">{error.message}</Typography>;
   }
 
-  const [path, setPath] = useState('');
-  const [contents, setContents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fileContent, setFileContent] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [isFile, setIsFile] = useState(false);
-  const [markdownContent, setMarkdownContent] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = await iosApi.getConfig();
+        console.log(token);
+        setGithubToken(token);
+      } catch (error) {
+        console.error('Error fetching GitHub token:', error);
+      }
+    };
+
+    fetchToken();
+  }, [iosApi]);
 
   useEffect(() => {
+    if (!githubToken) return;
+
     const fetchContents = async () => {
       setLoading(true);
       try {
@@ -143,7 +118,6 @@ const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl }) => {
           setContents(sortedContents);
           setIsFile(false);
 
-          // Check for .md files in the directory
           const mdFile = sortedContents.find((item) => item.name.toLowerCase().endsWith('.md'));
           if (mdFile) {
             const mdData = await fetchGithubFileContents(owner, repo, mdFile.path);
@@ -165,9 +139,47 @@ const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl }) => {
     };
 
     fetchContents();
-  }, [owner, repo, path]);
+  }, [githubToken, owner, repo, path]);
 
-  const handleItemClick = async (item: any) => {
+  const fetchGithubRepoContents = async (owner, repo, path = '') => {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `token ${githubToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Error fetching repository contents: ${response.statusText}`);
+    }
+    return response.json();
+  };
+
+  const fetchGithubFileContents = async (owner, repo, path = '') => {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      headers: {
+        Accept: 'application/vnd.github.v3.raw',
+        Authorization: `token ${githubToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Error fetching file contents: ${response.statusText}`);
+    }
+    return response.text();
+  };
+
+  const sortContents = (contents) => {
+    return contents.sort((a, b) => {
+      if (a.type === 'dir' && b.type !== 'dir') return -1;
+      if (a.type !== 'dir' && b.type === 'dir') return 1;
+      return a.name.localeCompare(b.name);
+    });
+  };
+
+  if (!repoUrl) {
+    return <Typography variant="h6">No repository URL provided</Typography>;
+  }
+
+  const handleItemClick = async (item) => {
     if (item.type === 'dir') {
       setPath(item.path);
     } else {
@@ -191,11 +203,11 @@ const GithubRepoPreview: React.FC<GithubRepoPreviewProps> = ({ repoUrl }) => {
     setIsFile(false);
   };
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
   };
 
-  const columns: TableColumn[] = [
+  const columns = [
     {
       title: '',
       field: 'icon',

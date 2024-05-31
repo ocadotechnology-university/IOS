@@ -7,6 +7,7 @@ export const iosApiRef = createApiRef<IosApi>({
 
 
 export interface IosApi {
+  getConfig() : Promise<string>;
   insertProject(
     project_title: string,
     entity_ref: string, 
@@ -87,6 +88,15 @@ export class IosClient implements IosApi {
     this.fetchApi = options.fetchApi;
   }
 
+  async getConfig(): Promise<string> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/config`;
+
+    const response = await fetch(url);
+
+    const token = await response.text();
+    return token;
+  }
   async insertProject(
     project_title: string, 
     entity_ref: string,
