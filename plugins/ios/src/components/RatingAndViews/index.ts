@@ -1,0 +1,1 @@
+export { RatingAndViews } from './RatingAndViews';

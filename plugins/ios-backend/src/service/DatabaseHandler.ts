@@ -336,6 +336,111 @@ export class DatabaseHandler {
     }
   }
 
+  async updateUserViewedProjects(
+    user_entity_ref: string,
+    viewed_project_id: number[]
+  ): Promise<void> {
+    try {
+      const projectsArray = "{" + viewed_project_id.join(",") + "}";
+
+        await this.client.raw(`
+            UPDATE "ios-table-users"
+            SET "viewed_projects_ids" = ?
+            WHERE "user_entity_ref" = ?
+        `, [projectsArray, user_entity_ref]);
+        
+      console.log(`User projects updated successfully.`);
+    } catch (error) {
+      console.error('Error updating user projects:', error);
+      throw error;
+    }
+  }
+
+  async getUsersViewedProjects(user_ref: string): Promise<number[]> {
+    const result = await this.client
+      .select('viewed_projects_ids')
+      .from('ios-table-users')
+      .where('user_entity_ref', user_ref);
+  
+    // Assuming result[0].viewed_projects_ids contains the JSON array
+    return result.length > 0 ? JSON.parse(result[0].viewed_projects_ids) : [];
+  }
+
+  async updateUserRatedProjects(
+    user_entity_ref: string,
+    rated_project_id: number[]
+  ): Promise<void> {
+    try {
+      const projectsArray = "{" + rated_project_id.join(",") + "}";
+
+        await this.client.raw(`
+            UPDATE "ios-table-users"
+            SET "rated_projects_ids" = ?
+            WHERE "user_entity_ref" = ?
+        `, [projectsArray, user_entity_ref]);
+        
+      console.log(`User projects updated successfully.`);
+    } catch (error) {
+      console.error('Error updating user projects:', error);
+      throw error;
+    }
+  }
+
+  async deleteUserRatedProject(
+    user_entity_ref: string,
+    project_id_to_delete: number
+  ): Promise<void> {
+    try {
+      // Fetch the current rated_projects_ids for the user
+      const result = await this.client
+        .select('rated_projects_ids')
+        .from('ios-table-users')
+        .where('user_entity_ref', user_entity_ref);
+  
+      if (result.length === 0) {
+        console.log(`No user found with user_entity_ref: ${user_entity_ref}`);
+        return;
+      }
+  
+      // Parse the current rated_projects_ids
+      let rated_projects_ids: number[] = result[0].rated_projects_ids || [];
+      if (typeof rated_projects_ids === 'string') {
+        rated_projects_ids = JSON.parse(rated_projects_ids);
+      }
+  
+      // Filter out the project_id_to_delete
+      const updated_rated_projects_ids = rated_projects_ids.filter(
+        id => id !== project_id_to_delete
+      );
+  
+      // Convert the array to the required format
+      const projectsArray = "{" + updated_rated_projects_ids.join(",") + "}";
+  
+      // Update the database with the new array
+      await this.client.raw(`
+        UPDATE "ios-table-users"
+        SET "rated_projects_ids" = ?
+        WHERE "user_entity_ref" = ?
+      `, [projectsArray, user_entity_ref]);
+  
+      console.log(`User projects updated successfully.`);
+    } catch (error) {
+      console.error('Error updating user projects:', error);
+      throw error;
+    }
+  }
+  
+
+  async getUsersRatedProjects(user_ref: string): Promise<number[]> {
+    const result = await this.client
+      .select('rated_projects_ids')
+      .from('ios-table-users')
+      .where('user_entity_ref', user_ref);
+  
+    return result.length > 0 ? JSON.parse(result[0].rated_projects_ids) : [];
+  }
+  
+
   async getUsersByProjectID(projectId: number): Promise<Array<{ user_id: number; username: string; user_avatar: string; entity_ref: string }>> {
     const result = await this.client
         .select('user_avatar', 'user_entity_ref')

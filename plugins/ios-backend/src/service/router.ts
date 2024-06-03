@@ -282,6 +282,108 @@ export async function createRouter(
       response.status(500).send('Internal server error.');
     }
   });
+  router.put('/ios_members/add_view', async (request, response) => {
+    const { 
+      user_entity,
+      viewed_projects_id,
+    } = request.body;
+    
+    let viewed_projects_ids_ar = await dbHandler.getUsersViewedProjects(user_entity);
+
+    let viewed_projects_ids
+    console.info('312-------------------- ', viewed_projects_ids);
+    if (!viewed_projects_ids_ar || viewed_projects_ids_ar.length === 0) {
+      viewed_projects_ids = [viewed_projects_id];
+    } else {
+      console.info('313-------------------- ', viewed_projects_ids);
+      viewed_projects_ids_ar = viewed_projects_ids_ar[0][0];
+      console.info('314-------------------- ', viewed_projects_ids);
+      viewed_projects_ids_ar.push(viewed_projects_id);
+    }
+    console.info('315-------------------- ', viewed_projects_ids);
+
+    try {
+      await dbHandler.updateUserViewedProjects(user_entity, viewed_projects_ids);
+      response.status(200).send('User viewed projects updated successfully.');
+    } catch (error) {
+      console.error('Error updating user viewed projects:', error);
+      response.status(500).send('Internal server error.');
+    }
+  });
+
+  router.post('/ios_members/views', async (request, response) => {
+    const { 
+      user_entity,
+    } = request.body;
+    console.log("body", user_entity);
+    try{ 
+      const viewed = await dbHandler.getUsersViewedProjects(user_entity);
+      response.status(200).json(viewed);
+    } catch (error) {
+      console.error('Error getting user views: ', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.put('/ios_members/add_rate/:rated_projects_ids', async (request, response) => {
+    const { 
+      user_entity,
+    } = request.body;
+    const rated_projects_id_str = request.params.rated_projects_ids;
+    const rated_projects_id = parseInt(rated_projects_id_str, 10); 
+    let rated_projects_ids_ar = await dbHandler.getUsersRatedProjects(user_entity);
+    
+    let rated_projects_ids
+
+    console.info('312-------------------- ', rated_projects_ids_ar);
+    if (!rated_projects_ids_ar || rated_projects_ids_ar.length === 0) {
+      rated_projects_ids = [rated_projects_id];
+    } else {
+      rated_projects_ids_ar = rated_projects_ids_ar[0][0];
+      rated_projects_ids_ar.push(rated_projects_id);
+    }
+    console.info('315-------------------- ', rated_projects_ids);
+
+    
+
+    try {
+      await dbHandler.updateUserRatedProjects(user_entity, rated_projects_ids);
+      response.status(200).send('User rated projects updated successfully.');
+    } catch (error) {
+      console.error('Error updating user rated projects:', error);
+      response.status(500).send('Internal server error.');
+    }
+  });
+
+  router.post('/ios_members/rates', async (request, response) => {
+    const { 
+      user_entity,
+    } = request.body;
+    console.log("body", user_entity);
+    try{ 
+      const rated = await dbHandler.getUsersRatedProjects(user_entity);
+      response.status(200).json(rated);
+    } catch (error) {
+      console.error('Error getting user rates: ', error);
+      response.status(500).send('Internal server error');
+    }
+  });
+
+  router.delete('/ios_members/rates_del/:project_id', async (request, response) => {
+    const project_id_str = request.params.project_id;
+    const { 
+      user_entity,
+    } = request.body;
+    const project_id = parseInt(project_id_str, 10); 
+
+    try {
+      await dbHandler.deleteUserRatedProject(user_entity, project_id);
+      response.status(200).send(`Value deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting value:', error);
+      response.status(500).send('Internal server error');
+    }
+  });
 
   router.post('/projects/:project_id/comments', async (request, response) => {
     const project_id_ref_str = request.params.project_id;
@@ -349,17 +451,30 @@ export async function createRouter(
     }
   });
 
-  router.put('/projects/:project_id', async (request, response) => {
+  router.put('/projects/views/:project_id/:project_views', async (request, response) => {
     const project_id_str = request.params.project_id;
     const project_id = parseInt(project_id_str, 10); 
-    const {
-      project_views
-    } = request.body
+    const project_views_str = request.params.project_views;
+    const project_views = parseInt(project_views_str, 10); 
     try {
       await dbHandler.updateProjectViews(project_id, project_views);
       response.status(200).send('Project views updated successfully.');
     } catch (error) {
       console.error('Error updating project: views', error);
+      response.status(500).send('Internal server error.');
+    }
+  });
+
+  router.put('/projects/rating/:project_id/:project_rating', async (request, response) => {
+    const project_id_str = request.params.project_id;
+    const project_id = parseInt(project_id_str, 10); 
+    const project_rating_str = request.params.project_rating;
+    const project_rating = parseInt(project_rating_str, 10); 
+    try {
+      await dbHandler.updateProjectRating(project_id, project_rating);
+      response.status(200).send('Project rating updated successfully.');
+    } catch (error) {
+      console.error('Error updating project: rating', error);
       response.status(500).send('Internal server error.');
     }
   });

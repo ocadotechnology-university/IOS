@@ -19,7 +19,8 @@ import PersonIcon from '@material-ui/icons/Person';
 import PeopleIcon from '@material-ui/icons/People';
 import MemoryIcon from '@material-ui/icons/Memory';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
-import { identityApiRef } from '@backstage/core-plugin-api'; // Import identity API
+import { identityApiRef } from '@backstage/core-plugin-api';
+import { RatingAndViews } from '../RatingAndViews';
 
 const useStyles = makeStyles((theme) => ({
   iconLink: {
@@ -100,6 +101,11 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     marginBottom: theme.spacing(2),
   },
+  ratingAndViews: {
+    marginRight: theme.spacing(30),
+    marginLeft: theme.spacing(10),
+    flexGrow: 1,
+  }
 }));
 
 type ProjectInfoProps = {
@@ -117,7 +123,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
   const catalogApi = useApi(catalogApiRef);
-  const identityApi = useApi(identityApiRef); // Use identity API
+  const identityApi = useApi(identityApiRef);
   const classes = useStyles();
 
   useEffect(() => {
@@ -141,7 +147,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
     const fetchCurrentUser = async () => {
       if (selectedProject) {
         try {
-          const userIdentity = await identityApi.getUserId(); // Get current user ID
+          const userIdentity = await identityApi.getUserId();
           console.log("Current User ID:", userIdentity);
           console.log("Project Manager Username:", selectedProject.project_manager_username);
 
@@ -177,19 +183,31 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
 
   return (
     <Paper className={classes.paper}>
-      <Box className={classes.header}>
+   <Box className={classes.header}>
         <Typography variant="h3">{selectedProject?.project_title}</Typography>
-        {isProjectManager && (
-          <Box className={classes.iconButtons}>
-            <IconButton size="small" onClick={handleEditClick} className={classes.iconButtonSpacing}>
-              <EditIcon />
-            </IconButton>
-            <IconButton size="small" onClick={handleDeleteClick}>
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        )}
+        <Box className={classes.iconButtons}>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item className={classes.ratingAndViews} >
+              <RatingAndViews project={selectedProject} />
+            </Grid>
+            {isProjectManager && (
+              <>
+                <Grid item>
+                  <IconButton size="small" onClick={handleEditClick} className={classes.iconButtonSpacing}>
+                    <EditIcon />
+                  </IconButton>
+                </Grid>
+                <Grid item>
+                  <IconButton size="small" onClick={handleDeleteClick}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Grid>
+              </>
+            )}
+          </Grid>
+        </Box>
       </Box>
+
       <StatusIndicator project={project} />
       <Grid container spacing={2}>
         <Grid item xs={12}>
@@ -198,6 +216,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
             {selectedProject?.project_description}
           </Typography>
         </Grid>
+        
         <Grid item xs={12} md={4}>
           <Box className={classes.info}>
             <Typography className={classes.label} display="inline">Last Updated:</Typography>

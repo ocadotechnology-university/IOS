@@ -27,6 +27,8 @@ exports.up = async function up(knex) {
         table.string('user_entity_ref').notNullable().comment("Username from catalog ");
         table.text('user_avatar').comment("Link to avatar of user");
         table.specificType('user_projects_ids', 'INTEGER[]').comment("Ids of projects that user in");
+        table.specificType('viewed_projects_ids', 'INTEGER[]').comment("Ids of projects that user ever viewed");
+        table.specificType('rated_projects_ids', 'INTEGER[]').comment("Ids of projects that user ever rated");
     });
 
     await knex.schema.createTable('ios-table-comments', table => {

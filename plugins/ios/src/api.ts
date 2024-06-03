@@ -25,6 +25,8 @@ export interface IosApi {
     ) : Promise<void>;
 
   deleteProject(project_id: number): Promise<void>;
+  deleteUserRatedProjectId(user_entity: string, project_id: number): Promise<void>;
+
 
   updateProject(
     project_id: number,
@@ -41,6 +43,27 @@ export interface IosApi {
     project_repository_link: string,
     ) : Promise<void>;
 
+    updateProjectViews(
+      project_id: number,
+      project_views: number,
+      ) : Promise<void>;
+  
+    updateProjectRating(
+      project_id: number,
+      project_rating: number,
+      ) : Promise<void>;
+  
+    updateUserViewed(
+      user_entity: string,
+      project_id: number,
+      ) : Promise<void>;
+  
+      updateUserRated(
+        user_entity: string,
+        project_id: number,
+        ) : Promise<void>;
+  
+  
   getProjects(
 
   ): Promise <Project[]>;
@@ -52,6 +75,8 @@ export interface IosApi {
     project_id: number,
   ): Promise<Project>
   getMembers(project_id: number): Promise <Member[]>
+  getUserViews(user_entity: string) : Promise<Member[]>;
+  getUserRates(user_entity: string) : Promise<Member[]>;
   insertMember( 
     project_id: number,
     user_entity_ref: string,
@@ -193,6 +218,158 @@ export class IosClient implements IosApi {
     .fetch(url)
     .then(res => res.json());
     
+  }
+  async updateProjectViews(
+    project_id: number,
+    project_views: number,
+    ): Promise<void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/views/${project_id}/${project_views}`;
+    
+    const response = await this.fetchApi.fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return await response.json();
+  }
+
+  async updateProjectRating(
+    project_id: number,
+    project_rating: number,
+    ): Promise<void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/projects/rating/${project_id}/${project_rating}`;
+    
+    const response = await this.fetchApi.fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return await response.json();
+  }
+
+  async updateUserViewed(
+    user_entity: string,
+    project_id: number,
+    ): Promise<void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    console.info('API-__-__-__-__-__-__-__-__ ', project_id);
+    const url = `${baseUrl}/ios_members/add_view`;
+    const payload = {
+      user_entity,
+      project_id,
+    };
+
+    const response = await this.fetchApi.fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      }, body: JSON.stringify(payload)
+    });
+
+    return await response.json();
+  }
+
+  async getUserViews(user_entity: string): Promise<Member[]> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/ios_members/views`;
+
+    const payload = {
+        user_entity,
+    };
+
+    try {
+        const response = await this.fetchApi.fetch(url, {
+            method: 'POST',  
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),  // Include payload in the body
+        });
+        if (!response.ok) {
+            throw new Error(`Error fetching user data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error; // Re-throw the error to handle it in the calling function
+    }
+  }
+
+  async updateUserRated(
+    user_entity: string,
+    project_id: number,
+    ): Promise<void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/ios_members/add_rate/${project_id}`;
+    const payload = {
+      user_entity,
+    };
+
+    const response = await this.fetchApi.fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      }, body: JSON.stringify(payload)
+    });
+
+    return await response.json();
+  }
+
+  async getUserRates(user_entity: string): Promise<Member[]> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/ios_members/rates`;
+
+    const payload = {
+        user_entity,
+    };
+
+    try {
+        const response = await this.fetchApi.fetch(url, {
+            method: 'POST',  
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),  // Include payload in the body
+        });
+        if (!response.ok) {
+            throw new Error(`Error fetching user data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error; // Re-throw the error to handle it in the calling function
+    }
+  }
+
+  async deleteUserRatedProjectId( 
+    user_entity: string,   
+    project_id: number
+    ): Promise<void> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('ios-backend');
+    const url = `${baseUrl}/ios_members/rates_del/${project_id}`;
+
+    const payload = {
+      user_entity,
+    };
+
+    const response = await this.fetchApi.fetch(url, {
+      method: 'DELETE',
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to delete project id from user rated: ${response.statusText}`);
+    }
+  
+    return await response.json();
   }
 
   async updateProject(
