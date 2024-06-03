@@ -96,7 +96,7 @@ export const GithubRepoPreview = ({ repoUrl }) => {
     const fetchToken = async () => {
       try {
         const token = await iosApi.getConfig();
-        console.log(token);
+        console.log("GitHub token: ", token);
         setGithubToken(token);
       } catch (error) {
         console.error('Error fetching GitHub token:', error);

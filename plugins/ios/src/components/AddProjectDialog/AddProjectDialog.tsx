@@ -47,6 +47,9 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
   const project_rating = 0;
   const project_views = 0;
 
+  const [project_manager_entity_ref, setProjectManagerEntityRef] = useState('');
+  const [project_team_owner_entity_ref, setProjectTeamOwnerEntityRef] = useState('');
+
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [catalogEntities, setCatalogEntities] = useState([]);
@@ -156,13 +159,11 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
         return;
       }
 
-      const userReferences = users.map(user => stringifyEntityRef(user)).join(', ');
-      const groupReferences = groups.map(group => stringifyEntityRef(group)).join(', ');
-
+      // Use full entity reference directly
       await iosApi.insertMember(
         projectId,
-        userReferences,
-        groupReferences,
+        project_manager_entity_ref,
+        project_team_owner_entity_ref,
       );
 
     } catch (error) {
@@ -208,7 +209,11 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           <InputLabel>Project Manager</InputLabel>
           <Select
             value={project_manager_username}
-            onChange={(e) => setProjectManagerUsername(e.target.value)}
+            onChange={(e) => {
+              const selectedUser = users.find(user => user.metadata.name === e.target.value);
+              setProjectManagerUsername(e.target.value);
+              setProjectManagerEntityRef(stringifyEntityRef(selectedUser));
+            }}
           >
             {users.map((user) => (
               <MenuItem key={user.metadata.uid} value={user.metadata.name}>
@@ -251,7 +256,11 @@ export const AddProjectDialog = ({ open, handleCloseDialog }: Props) => {
           <InputLabel>Project Team Owner Name</InputLabel>
           <Select
             value={project_team_owner_name}
-            onChange={(e) => setProjectTeamOwnerName(e.target.value)}
+            onChange={(e) => {
+              const selectedGroup = groups.find(group => group.metadata.name === e.target.value);
+              setProjectTeamOwnerName(e.target.value);
+              setProjectTeamOwnerEntityRef(stringifyEntityRef(selectedGroup));
+            }}
           >
             {groups.map((group) => (
               <MenuItem key={group.metadata.uid} value={group.metadata.name}>

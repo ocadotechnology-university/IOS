@@ -19,6 +19,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import PeopleIcon from '@material-ui/icons/People';
 import MemoryIcon from '@material-ui/icons/Memory';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
+import { identityApiRef } from '@backstage/core-plugin-api'; // Import identity API
 
 const useStyles = makeStyles((theme) => ({
   iconLink: {
@@ -116,6 +117,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
   const iosApi = useApi(iosApiRef);
   const alertApi = useApi(alertApiRef);
   const catalogApi = useApi(catalogApiRef);
+  const identityApi = useApi(identityApiRef); // Use identity API
   const classes = useStyles();
 
   useEffect(() => {
@@ -139,12 +141,11 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
     const fetchCurrentUser = async () => {
       if (selectedProject) {
         try {
-          const currentUser = await catalogApi.getEntityByName({
-            kind: 'user',
-            namespace: 'default',
-            name: selectedProject.project_manager_username,
-          });
-          if (currentUser) {
+          const userIdentity = await identityApi.getUserId(); // Get current user ID
+          console.log("Current User ID:", userIdentity);
+          console.log("Project Manager Username:", selectedProject.project_manager_username);
+
+          if (userIdentity === selectedProject.project_manager_username) {
             setIsProjectManager(true);
           }
         } catch (error) {
@@ -154,7 +155,7 @@ export const ProjectInfo = ({ project, entity_ref, onDeleteClick, fetchProjects 
     };
 
     fetchCurrentUser();
-  }, [selectedProject, catalogApi]);
+  }, [selectedProject, identityApi]);
 
   const handleEditClick = () => {
     setOpenUpdateDialog(true);
